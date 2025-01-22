@@ -1,8 +1,10 @@
 import React from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import ReactDOM from "react-dom/client";
 import App from "./components/App";
 import Skeleton from "./components/pages/Skeleton";
 import NotFound from "./components/pages/NotFound";
+// import Market from "./components/pages/Market";
 // import User from "./components/pages/User";
 
 import {
@@ -23,6 +25,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<Skeleton />} />
       {/* remove the comment when user done */}
       {/* <Route path="/user/:id" element={<User />} /> */}
+      {/* <Route path="/market" element={<Market />} /> */}
     </Route>
   )
 );

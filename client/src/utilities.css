@@ -44,6 +44,10 @@ form {
 
 .u-flex {
   display: flex;
+  margin-left: var(--m);
+  margin-right: var(--m);
+  margin-top: var(--s);
+  margin-bottom: var(--l);
 }
 
 .u-flexColumn {

@@ -1,46 +1,65 @@
-import React, { useContext } from "react";
-import { GoogleLogin, googleLogout } from "@react-oauth/google";
+import React, { useEffect, useState } from "react";
+import ProductCard from "../modules/Card";
+import SearchProduct from "../modules/SearchProduct";
 
-import "../../utilities.css";
-import "./Skeleton.css";
-import { UserContext } from "../App";
+const App = () => {
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
-const Skeleton = () => {
-  const { userId, handleLogin, handleLogout } = useContext(UserContext);
+  const matchProduct = (value) => {
+    if (value.trim() === "") {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter((product) =>
+        product.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  };
+
+  useEffect(() => {
+    const product1 = {
+      id: 1,
+      owner: "seller1",
+      name: "Product 1",
+      prize: 100,
+      description: "pick up by April 32",
+      image: "../favicon.png",
+    };
+    const product2 = {
+      id: 2,
+      owner: "seller2",
+      name: "Product 2",
+      prize: 200,
+      description: "pick up by April 32",
+      image: "../favicon.png",
+    };
+    const product3 = {
+      id: 3,
+      owner: "seller3",
+      name: "Product 3",
+      prize: 300,
+      description: "pick up by April 32",
+      image: "../favicon.png",
+    };
+    const hardcodedProducts = [product1, product2, product3];
+
+    setProducts(hardcodedProducts);
+    setFilteredProducts(hardcodedProducts);
+  }, []);
+
   return (
-    <>
-      {userId ? (
-        <button
-          onClick={() => {
-            googleLogout();
-            handleLogout();
-          }}
-        >
-          Logout
-        </button>
-      ) : (
-        <GoogleLogin onSuccess={handleLogin} onError={(err) => console.log(err)} />
-      )}
-      <h1>Good luck on your project :)</h1>
-      <h2> What you need to change in this skeleton</h2>
-      <ul>
-        <li>
-          Change the Frontend CLIENT_ID (index.jsx) to your team's CLIENT_ID (obtain this at
-          http://weblab.is/clientid)
-        </li>
-        <li>Change the Server CLIENT_ID to the same CLIENT_ID (auth.js)</li>
-        <li>
-          Change the Database SRV (mongoConnectionURL) for Atlas (server.js). You got this in the
-          MongoDB setup.
-        </li>
-        <li>Change the Database Name for MongoDB to whatever you put in the SRV (server.js)</li>
-      </ul>
-      <h2>How to go from this skeleton to our actual app</h2>
-      <a href="https://docs.google.com/document/d/110JdHAn3Wnp3_AyQLkqH2W8h5oby7OVsYIeHYSiUzRs/edit?usp=sharing">
-        Check out this getting started guide
-      </a>
-    </>
+    <div>
+      <div>
+        <SearchProduct product={matchProduct} />
+      </div>
+      <div className="d-flex flex-wrap gap-3">
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    </div>
   );
 };
 
-export default Skeleton;
+export default App;
