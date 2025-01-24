@@ -1,12 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap");
+
 .NavBar-container {
   display: flex;
-  padding: var(--s) var(--m);
+  padding: var(--m) var(--l);
   background-color: var(--primary);
 }
 
+.NavBar-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .NavBar-title {
-  color: var(--white);
-  font-size: 20px;
+  color: var(--Black);
+  font-family: "Do Hyeon", sans-serif;
+  font-size: 40px;
+  text-decoration: none;
 }
 
 .NavBar-linkContainer {
@@ -15,7 +25,7 @@
 
 .NavBar-link,
 .NavBar-link:visited {
-  color: var(--white);
+  color: var(--Black);
   opacity: 0.6;
   text-decoration: none;
 }
