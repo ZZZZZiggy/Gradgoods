@@ -43,7 +43,40 @@
   margin-left: var(--m);
 }
 
-.NavBar-profile {
+.NavBar-profile-container {
   margin-left: auto;
   padding-right: var(--xs);
+}
+
+.NavBar-popup {
+  position: absolute;
+  top: 4em;
+  right: 2em;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding-left: 8px;
+  border-radius: 5px;
+
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.NavBar-popup.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup-item {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.popup-item:hover {
+  background-color: #f5f5f5;
+}
+.popup-item a {
+  color: #333;
+  text-decoration: none;
+  display: block;
 }

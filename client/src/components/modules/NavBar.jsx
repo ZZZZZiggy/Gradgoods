@@ -1,16 +1,27 @@
-import React, { useContext } from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
-
-import { get, post } from "../../utilities";
 import "./NavBar.css";
 
-import { UserContext } from "../context/UserContext";
+const NavBar = () => {
+  const [isHovered, setIsHovered] = useState(false);
+  // 用一个ref来存定时器，避免每次渲染都丢失
+  const hoverTimeoutRef = useRef(null);
 
-// NavBar is a React component that renders the navigation bar at the top of all pages
+  // 鼠标移入时：清除定时器并显示弹框
+  const handleMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsHovered(true);
+  };
 
-const NavBar = (props) => {
-  const user = useContext(UserContext);
+  // 鼠标移出时：设置一个延迟关闭弹框的定时器
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 100); // 这里可以根据需要调整延迟时间
+  };
+
   return (
     <nav className="NavBar-container">
       <div className="NavBar-content">
@@ -19,39 +30,28 @@ const NavBar = (props) => {
             GradGoods
           </Link>
         </div>
-        <div className="NavBar-linkContainer u-inlineBlock">
-          {/* {user ? (
-              <>
-                <Link to="/user" className="NavBar-link">
-                  Profile
-                </Link>
-                <Link to="/logout" className="NavBar-link">
-                  Logout
-                </Link>
-              </>
-            ) : (
-              <GoogleLogin
-                clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
-                onSuccess={(res) => {
-                  post("/api/login", { token: res.tokenId }).then((user) => {
-                    setUser(user);
-                  });
-                }}
-                onFailure={(err) => {
-                  console.log(err);
-                }}
-                render={(renderProps) => (
-                  <button onClick={renderProps.onClick} disabled={renderProps.disabled}>
-                    Login with Google
-                  </button>
-                )}
-              />
-            )} */}
-        </div>
-        <div className="NavBar-profile u-inlineBlock">
-          <Link to="/profile" className="NavBar-link">
-            Profile
-          </Link>
+        <div
+          className="NavBar-profile-container"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className="NavBar-profile u-inlineBlock">
+            <Link to="/profile" className="NavBar-link">
+              PROFILE
+            </Link>
+          </div>
+
+          <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
+            <div className="popup-item">
+              <Link to="/profile">My Profile</Link>
+            </div>
+            <div className="popup-item">
+              <Link to="/settings">Settings</Link>
+            </div>
+            <div className="popup-item">
+              <Link to="/logout">Logout</Link>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
