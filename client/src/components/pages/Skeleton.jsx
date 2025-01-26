@@ -5,6 +5,11 @@ import SearchProduct from "../modules/SearchProduct";
 const App = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filterStatus, setFilterStatus] = useState(false);
+
+  const handleFilterChange = () => {
+    setFilterStatus((prev) => !prev);
+  };
 
   const matchProduct = (value) => {
     if (value.trim() === "") {
@@ -50,8 +55,9 @@ const App = () => {
 
   return (
     <div>
+      <div>{filterStatus ? <div>Filter Opened</div> : <div>Filter Closed</div>}</div>
       <div>
-        <SearchProduct product={matchProduct} />
+        <SearchProduct product={matchProduct} onFilterChange={handleFilterChange} />
       </div>
       <div className="d-flex flex-wrap gap-3">
         {filteredProducts.map((product) => (

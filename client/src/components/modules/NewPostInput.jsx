@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./NewPostInput.css";
 
-const NewPostInput = ({ onSubmit, defaultText }) => {
+const NewPostInput = ({ onSubmit, defaultText, onFilterChange }) => {
   const [value, setValue] = useState("");
 
   const handleChange = (event) => {
@@ -13,10 +13,13 @@ const NewPostInput = ({ onSubmit, defaultText }) => {
     onSubmit && onSubmit(value);
     setValue("");
   };
+  const ShowFilter = () => {
+    onFilterChange();
+  };
 
   return (
     <div className="SearchBar">
-      <button type="submit" className="NewPostInput-filter u-pointer" onClick={handleSubmit}>
+      <button type="submit" className="NewPostInput-filter u-pointer" onClick={ShowFilter}>
         Filter
       </button>
       <input
