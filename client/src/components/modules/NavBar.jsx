@@ -1,13 +1,14 @@
 import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import PopupProfile from "./PopupProfile";
 import "./NavBar.css";
 
 const NavBar = () => {
   const [isHovered, setIsHovered] = useState(false);
-  // 用一个ref来存定时器，避免每次渲染都丢失
+  // use a ref to store the timeout
   const hoverTimeoutRef = useRef(null);
 
-  // 鼠标移入时：清除定时器并显示弹框
+  // mouse enter, clear the timeout to keep the popup
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -15,11 +16,11 @@ const NavBar = () => {
     setIsHovered(true);
   };
 
-  // 鼠标移出时：设置一个延迟关闭弹框的定时器
+  // mouse leave, set a timeout to hide the popup
   const handleMouseLeave = () => {
     hoverTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 100); // 这里可以根据需要调整延迟时间
+    }, 100);
   };
 
   return (
@@ -36,22 +37,11 @@ const NavBar = () => {
           onMouseLeave={handleMouseLeave}
         >
           <div className="NavBar-profile u-inlineBlock">
-            <Link to="/profile" className="NavBar-link">
+            <Link to="../pages/profile" className="NavBar-link">
               PROFILE
             </Link>
           </div>
-
-          <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
-            <div className="popup-item">
-              <Link to="/profile">My Profile</Link>
-            </div>
-            <div className="popup-item">
-              <Link to="/settings">Settings</Link>
-            </div>
-            <div className="popup-item">
-              <Link to="/logout">Logout</Link>
-            </div>
-          </div>
+          <PopupProfile isHovered={isHovered} />
         </div>
       </div>
     </nav>
