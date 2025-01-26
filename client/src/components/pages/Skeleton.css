@@ -1,1 +1,25 @@
-/* Fill me in :) */
+.container {
+  display: flex;
+  width: 100%;
+  align-content: space-between;
+  /* justify-content: flex-start; */
+}
+
+.items_filter_opened {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 14px;
+  flex-wrap: wrap;
+  margin: 15px 15px;
+  margin-left: 18%;
+}
+
+.items_filter_closed {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap; /* Allow wrapping */
+  font-size: 14px;
+  margin: 15px 0;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../modules/Card";
 import SearchProduct from "../modules/SearchProduct";
+import "./Skeleton.css";
 
 const App = () => {
   const [products, setProducts] = useState([]);
@@ -37,7 +38,7 @@ const App = () => {
       name: "Product 2",
       prize: 200,
       description: "pick up by April 32",
-      image: "../favicon.png",
+      image: "/1.jpg",
     };
     const product3 = {
       id: 3,
@@ -45,9 +46,33 @@ const App = () => {
       name: "Product 3",
       prize: 300,
       description: "pick up by April 32",
-      image: "../favicon.png",
+      image: "/1.jpg",
     };
-    const hardcodedProducts = [product1, product2, product3];
+    const product4 = {
+      id: 1,
+      owner: "seller1",
+      name: "Product 1",
+      prize: 100,
+      description: "pick up by April 32",
+      image: "/1.jpg",
+    };
+    const product5 = {
+      id: 2,
+      owner: "seller2",
+      name: "Product 2",
+      prize: 200,
+      description: "pick up by April 32",
+      image: "/1.jpg",
+    };
+    const product6 = {
+      id: 3,
+      owner: "seller3",
+      name: "Product 3",
+      prize: 300,
+      description: "pick up by April 32",
+      image: "/1.jpg",
+    };
+    const hardcodedProducts = [product1, product2, product3, product4, product5, product6];
 
     setProducts(hardcodedProducts);
     setFilteredProducts(hardcodedProducts);
@@ -55,14 +80,23 @@ const App = () => {
 
   return (
     <div>
-      <div>{filterStatus ? <div>Filter Opened</div> : <div>Filter Closed</div>}</div>
       <div>
         <SearchProduct product={matchProduct} onFilterChange={handleFilterChange} />
       </div>
-      <div className="d-flex flex-wrap gap-3">
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+      <div className="container">
+        {filterStatus ? (
+          <div className="items_filter_opened">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} width="14.9rem" />
+            ))}
+          </div>
+        ) : (
+          <div className="items_filter_closed">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} width="14.9rem" />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
