@@ -1,15 +1,32 @@
+.SearchBar {
+  display: flex;
+  width: 70%;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: var(--xs);
+  background-color: var(--white);
+  border: 1px solid var(--g);
+}
+
 .NewPostInput-input,
-.NewPostInput-button {
-  font-family: "Open Sans";
-  font-size: 14px;
+.NewPostInput-button,
+.NewPostInput-filter {
+  font-family: "Funnel Sans";
+  font-size: var(--m);
   padding: var(--s) var(--m);
+  height: 56px; /* Ensure same height */
+  border: none; /* Remove border */
+  background-color: var(--medgrey); /* Set grey background color */
 }
 
 .NewPostInput-input {
   flex-grow: 1;
-  border: var(--darkgrey) 1px solid;
-  border-radius: var(--xs) 0 0 var(--xs);
   transition: box-shadow 0.1s;
+  z-index: 1;
 }
 
 .NewPostInput-input:focus-within {
@@ -18,14 +35,15 @@
 }
 
 .NewPostInput-button {
-  color: var(--primary);
-  border: var(--primary) 1px solid;
-  border-radius: 0 var(--xs) var(--xs) 0;
-  background: none;
+  border-radius: 0 28px 28px 0;
+}
+.NewPostInput-filter {
   transition: color 0.1s, background 0.1s;
+  border-radius: 28px 0 0 28px;
 }
 
-.NewPostInput-button:hover {
+.NewPostInput-button:hover,
+.NewPostInput-filter:hover {
   color: var(--white);
   background-color: var(--primary);
 }

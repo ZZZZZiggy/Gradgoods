@@ -24,7 +24,7 @@ const App = () => {
       name: "Product 1",
       prize: 100,
       description: "pick up by April 32",
-      image: "../favicon.png",
+      image: "/1.jpg",
     };
     const product2 = {
       id: 2,

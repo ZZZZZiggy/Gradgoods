@@ -15,7 +15,10 @@ const NewPostInput = ({ onSubmit, defaultText }) => {
   };
 
   return (
-    <div className="u-flex">
+    <div className="SearchBar">
+      <button type="submit" className="NewPostInput-filter u-pointer" onClick={handleSubmit}>
+        Filter
+      </button>
       <input
         type="text"
         placeholder={defaultText}
