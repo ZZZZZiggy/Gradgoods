@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../modules/Card";
 import SearchProduct from "../modules/SearchProduct";
+import FilterCard from "../modules/Filter";
 import "./Skeleton.css";
 
 const App = () => {
@@ -86,6 +87,7 @@ const App = () => {
       <div className="container">
         {filterStatus ? (
           <div className="items_filter_opened">
+            {/* <FilterCard /> */}
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} width="14.9rem" />
             ))}
