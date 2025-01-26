@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../modules/Card";
 import SearchProduct from "../modules/SearchProduct";
-import FilterCard from "../modules/Filter";
+import FilterCard from "../modules/filter";
 import "./Skeleton.css";
 
 const App = () => {
+  // state to store the products
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [filterStatus, setFilterStatus] = useState(false);
@@ -50,7 +51,7 @@ const App = () => {
       image: "/1.jpg",
     };
     const product4 = {
-      id: 1,
+      id: 4,
       owner: "seller1",
       name: "Product 1",
       prize: 100,
@@ -58,7 +59,7 @@ const App = () => {
       image: "/1.jpg",
     };
     const product5 = {
-      id: 2,
+      id: 5,
       owner: "seller2",
       name: "Product 2",
       prize: 200,
@@ -66,7 +67,7 @@ const App = () => {
       image: "/1.jpg",
     };
     const product6 = {
-      id: 3,
+      id: 6,
       owner: "seller3",
       name: "Product 3",
       prize: 300,
@@ -84,24 +85,24 @@ const App = () => {
       <div>
         <SearchProduct product={matchProduct} onFilterChange={handleFilterChange} />
       </div>
-      <div className="container">
-        {filterStatus ? (
-          <div className="items_filter_opened">
-            {/* <FilterCard /> */}
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} width="14.9rem" />
-            ))}
-          </div>
-        ) : (
-          <div className="items_filter_closed">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} width="14.9rem" />
-            ))}
+      {/* container */}
+      <div className="product_container">
+        {/* filter container */}
+        {filterStatus && (
+          <div className="filter_container">
+            <FilterCard />
           </div>
         )}
+        {/* products container */}
+        <div className={`items_filter_${filterStatus ? "opened" : "closed"}`}>
+          <div className="card_array">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} width="14rem" />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
-
 export default App;

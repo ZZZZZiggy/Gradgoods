@@ -19,7 +19,7 @@
 
 :root {
   --primary: #ffc200;
-  --primary--dim: #6987db;
+  --primary--dim: #e1ac00;
   --darkgrey: #d4d4d4;
   --medgrey: #e0e0e0;
   --grey: #f7f7f7;
@@ -29,6 +29,8 @@
   --s: 8px;
   --m: 16px;
   --l: 24px;
+
+  --margin: 10px;
 }
 
 body {

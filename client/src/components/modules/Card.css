@@ -5,7 +5,7 @@
   background-color: var(--grey);
   border-radius: var(--m);
   transition: 0.3s;
-  margin: 10px;
+  /* margin: var(--m); */
 }
 .image {
   border-radius: var(--m) var(--m) 0 0;
