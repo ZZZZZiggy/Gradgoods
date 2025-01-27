@@ -1,0 +1,93 @@
+.rc-slider-track {
+  background-color: var(--primary);
+}
+
+.rc-slider-handle {
+  border-color: var(--primary);
+  background-color: var(--white);
+}
+
+.rc-slider-handle:hover {
+  border-color: var(--primary);
+}
+
+.rc-slider-handle-active:active {
+  border-color: var(--primary);
+}
+
+.range-slider {
+  height: 4px;
+  background: var(--grey);
+}
+
+.range-slider .range-slider__range {
+  background: var(--primary);
+}
+
+.range-slider .range-slider__thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--primary);
+  cursor: pointer;
+}
+
+.range-slider .range-slider__thumb:hover {
+  background: var(--primary);
+}
+
+.double-range-container {
+  position: relative;
+  height: 30px;
+  padding: 0 15px;
+}
+
+.range-input {
+  position: absolute;
+  width: calc(100% - 30px);
+  height: 4px;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+}
+
+.range-input::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--primary);
+  pointer-events: auto;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.range-input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--grey);
+}
+
+.range-min {
+  z-index: 2;
+}
+
+.range-max {
+  z-index: 1;
+}
+
+/* For Firefox */
+.range-input::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--primary);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.range-input::-moz-range-track {
+  height: 4px;
+  background: var(--grey);
+}

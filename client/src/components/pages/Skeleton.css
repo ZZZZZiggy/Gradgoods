@@ -61,7 +61,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--white);
+  /* background-color: var(--white); */
   padding: var(--s) 0;
   z-index: 1000;
+  display: flex;
+  align-items: center; /* Centers items vertically */
+  justify-content: center; /* Centers items horizontally */
+  height: 6rem; /* Give it a fixed height */
 }

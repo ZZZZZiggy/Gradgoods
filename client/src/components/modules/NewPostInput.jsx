@@ -10,7 +10,7 @@ const NewPostInput = ({ onSubmit, defaultText, onFilterChange }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit && onSubmit(value.trim());
+    onSubmit && onSubmit(value);
     setValue("");
   };
   const ShowFilter = () => {

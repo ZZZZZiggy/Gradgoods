@@ -3,21 +3,23 @@
   justify-content: center;
   align-items: center;
   align-content: center;
-  margin: var(--xs) 0; /* Reduced margins since it's in a fixed container */
+  /* Remove padding here as it's handled by pagination-fixed-container */
 }
 
 .pagination {
   width: 70%;
   display: flex;
   height: 4rem;
-
+  justify-content: center;
   align-content: center;
   align-items: center;
   list-style: none;
   gap: var(--xs);
   border-radius: 2rem;
-  /* border: 1px solid var(--darkgrey); */
-  background-color: var(--grey);
+  border: 0.1px solid var(--darkgrey);
+  background-color: rgba(240, 240, 240, 0.8); /* 半透明灰色 */
+  backdrop-filter: blur(8px); /* 磨砂玻璃效果 */
+  -webkit-backdrop-filter: blur(8px); /* Safari 支持 */
 }
 
 .pagination-xsmall {
