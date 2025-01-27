@@ -24,27 +24,30 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="NavBar-container">
-      <div className="NavBar-content">
-        <div>
-          <Link to="/" className="NavBar-title u-inlineBlock">
-            GradGoods
-          </Link>
-        </div>
-        <div
-          className="NavBar-profile-container"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="NavBar-profile u-inlineBlock">
-            <Link to="../pages/profile" className="NavBar-link">
-              PROFILE
+    <>
+      <div className="NavBar-placeholder"></div>
+      <nav className="NavBar-container">
+        <div className="NavBar-content">
+          <div>
+            <Link to="/" className="NavBar-title u-inlineBlock">
+              GradGoods
             </Link>
           </div>
-          <PopupProfile isHovered={isHovered} />
+          <div
+            className="NavBar-profile-container"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="NavBar-profile u-inlineBlock">
+              <Link to="../pages/profile" className="NavBar-link">
+                PROFILE
+              </Link>
+            </div>
+            <PopupProfile isHovered={isHovered} />
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 

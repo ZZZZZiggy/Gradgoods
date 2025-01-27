@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import ProductCard from "../modules/Card";
 import SearchProduct from "../modules/SearchProduct";
 import FilterCard from "../modules/filter";
+import Pagination from "../modules/Pagination";
 import "./Skeleton.css";
 
 const App = () => {
-  // state to store the products
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [filterStatus, setFilterStatus] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 80;
 
   const handleFilterChange = () => {
     setFilterStatus((prev) => !prev);
@@ -80,29 +82,45 @@ const App = () => {
     setFilteredProducts(hardcodedProducts);
   }, []);
 
+  // product pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // change page
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div>
+    <div className="page-wrapper">
       <div>
         <SearchProduct product={matchProduct} onFilterChange={handleFilterChange} />
       </div>
-      {/* container */}
       <div className="product_container">
-        {/* filter container */}
         {filterStatus && (
           <div className="filter_container">
             <FilterCard />
           </div>
         )}
-        {/* products container */}
         <div className={`items_filter_${filterStatus ? "opened" : "closed"}`}>
           <div className="card_array">
-            {filteredProducts.map((product) => (
+            {currentProducts.map((product) => (
               <ProductCard key={product.id} product={product} width="14rem" />
             ))}
           </div>
         </div>
       </div>
+      <div className="pagination-fixed-container">
+        <Pagination
+          productsPerPage={productsPerPage}
+          totalProducts={filteredProducts.length}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 };
+
 export default App;

@@ -1,17 +1,23 @@
 .card {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* 改为flex-start确保内容从顶部开始 */
   background-color: var(--grey);
   border-radius: var(--m);
   transition: 0.3s;
+  height: 21rem;
   /* margin: var(--m); */
 }
 .image {
   border-radius: var(--m) var(--m) 0 0;
+  height: 13em;
+  object-fit: cover;
 }
 .body {
   padding: var(--m);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .header {
   display: flex;

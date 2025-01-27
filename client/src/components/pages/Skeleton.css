@@ -3,15 +3,16 @@
   width: 80%;
   justify-content: center;
   margin: 0 auto; /* Add this line to center the container */
+  flex-grow: 1;
 }
 .filter_container {
   flex-direction: column;
-  width: max(min(30%, calc(14rem)), 28rem);
+  width: max(min(25%, calc(14rem)), 28rem);
   padding: var(--margin);
   margin: 0 auto;
 }
 .items_filter_opened {
-  width: clamp(60%, 70%, 90%);
+  width: clamp(60%, 75%, 90%);
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -30,4 +31,37 @@
   gap: var(--m) var(--xs);
   padding: var(--margin);
   justify-items: center;
+  align-items: start;
+}
+.pagination-outer {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  width: 50%;
+  /* background-color: var(--white); */
+  padding: var(--s) 0;
+  position: fixed;
+  bottom: 1em;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Add wrapper class for flex layout */
+.page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 6rem; /* Increased to accommodate fixed pagination */
+  position: relative;
+}
+
+.pagination-fixed-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--white);
+  padding: var(--s) 0;
+  z-index: 1000;
 }
