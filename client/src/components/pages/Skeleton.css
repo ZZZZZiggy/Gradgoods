@@ -7,7 +7,7 @@
 }
 .filter_container {
   flex-direction: column;
-  width: max(min(25%, calc(14rem)), 28rem);
+  width: max(min(30%, 28rem), 18rem);
   padding: var(--margin);
   margin: 0 auto;
 }
@@ -16,6 +16,7 @@
   margin: 0 auto;
   display: flex;
   justify-content: center;
+  gap: var(--m);
 }
 
 .items_filter_closed {
@@ -23,14 +24,17 @@
   margin: 0 auto;
   display: flex;
   justify-content: center;
+  gap: var(--m);
 }
 .card_array {
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: var(--m) var(--xs);
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, 13.5rem);
+  height: 21rem;
+  gap: var(--m);
   padding: var(--margin);
-  justify-items: center;
+  justify-content: center;
   align-items: start;
 }
 .pagination-outer {
@@ -68,4 +72,27 @@
   align-items: center; /* Centers items vertically */
   justify-content: center; /* Centers items horizontally */
   height: 6rem; /* Give it a fixed height */
+}
+
+.no-match-message {
+  text-align: center;
+  color: var(--black);
+  background-color: var(--primary);
+  padding: var(--s);
+  margin: var(--m) auto;
+  border-radius: var(--s);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

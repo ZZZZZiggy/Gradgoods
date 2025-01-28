@@ -2,15 +2,24 @@ import React, { useState } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
 import "./Card.css";
 
-const ProductCard = ({ product, width = "14.9rem" }) => {
+// this function receives a product object(the hard coded product or from database) and returns a card component
+const ProductCard = ({ product }) => {
   const [showModal, setShowModal] = useState(false);
 
   const handleOpen = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
+  const handleAddToCart = () => {
+    // Future cart functionality
+    console.log("Added to cart:", product);
+  };
+  const handleOrder = () => {
+    // Future order functionality
+    console.log("Ordered:", product);
+  };
 
   return (
     <>
-      <Card style={{ width }} className="card">
+      <Card className="card">
         <Card.Img variant="top" src={product.image} className="image" />
         <Card.Body className="body">
           <div className="header">
@@ -20,35 +29,37 @@ const ProductCard = ({ product, width = "14.9rem" }) => {
           <div className="footer">
             <Card.Title className="prize">${product.prize}</Card.Title>
             <Button className="button" variant="primary" onClick={handleOpen}>
-              Reserve
+              Interseted
             </Button>
           </div>
         </Card.Body>
       </Card>
 
-      <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Product Details</Modal.Title>
+      <Modal show={showModal} onHide={handleClose} className="product-modal">
+        <Modal.Header closeButton className="modal-header">
+          <Modal.Title className="modal-title">{product.name}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <h5>{product.name}</h5>
-          <p>
-            <strong>Description:</strong> {product.description}
-          </p>
-          <p>
-            <strong>Price:</strong> ${product.prize}
-          </p>
-          <p>
-            <strong>Owner:</strong> {product.owner}
-          </p>
+        <Modal.Body className="modal-body">
+          <img src={product.image} alt={product.name} className="modal-image" />
+          <div className="modal-details">
+            <p className="modal-description">
+              <strong>Description:</strong> {product.description}
+            </p>
+            <p className="modal-price">
+              <strong>Price:</strong> ${product.prize}
+            </p>
+            <p className="modal-owner">
+              <strong>Owner:</strong> {product.owner}
+            </p>
+          </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Confirm Reservation
-          </Button>
+        <Modal.Footer className="modal-footer">
+          <button className="modal-button secondary" onClick={handleAddToCart}>
+            Add to Cart
+          </button>
+          <button className="modal-button primary" onClick={handleOrder}>
+            Order
+          </button>
         </Modal.Footer>
       </Modal>
     </>

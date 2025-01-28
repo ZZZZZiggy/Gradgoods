@@ -4,8 +4,8 @@ import ReactDOM from "react-dom/client";
 import App from "./components/App";
 import Skeleton from "./components/pages/Skeleton";
 import NotFound from "./components/pages/NotFound";
-// import Market from "./components/pages/Market";
-// import User from "./components/pages/User";
+import Cart from "./components/pages/Cart";
+import Sell from "./components/pages/Sell";
 
 import {
   createBrowserRouter,
@@ -23,9 +23,8 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route errorElement={<NotFound />} element={<App />}>
       <Route path="/" element={<Skeleton />} />
-      {/* remove the comment when user done */}
-      {/* <Route path="/user/:id" element={<User />} /> */}
-      {/* <Route path="/market" element={<Market />} /> */}
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/sell" element={<Sell />} />
     </Route>
   )
 );

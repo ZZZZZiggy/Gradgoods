@@ -7,16 +7,17 @@ const PopupProfile = ({ isHovered }) => {
     <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
       {/* avatar */}
       <div className="popup-avatar">
-        <Link to="../pages/profile">
+        <Link to="/profile">
           <img src="/1.jpg" alt="Avatar" />
+          {/* will be replaced with user's avatar */}
         </Link>
       </div>
 
       {/* middle area */}
       <div className="popup-items-center">
-        <div className="popup-item">
+        {/* <div className="popup-item">
           <Link to="/orders">Orders</Link>
-        </div>
+        </div> */}
         <div className="popup-item">
           <Link to="/cart">Cart</Link>
         </div>

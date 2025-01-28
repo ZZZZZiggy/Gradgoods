@@ -39,7 +39,7 @@ const NavBar = () => {
             onMouseLeave={handleMouseLeave}
           >
             <div className="NavBar-profile u-inlineBlock">
-              <Link to="../pages/profile" className="NavBar-link">
+              <Link to="/cart" className="NavBar-link">
                 PROFILE
               </Link>
             </div>

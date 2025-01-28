@@ -1,0 +1,296 @@
+.cart-container {
+  /* display: flex; */
+  padding: var(--xl);
+  width: clamp(60%, 90%, 100%);
+  margin: 0 auto;
+}
+
+.cart-title {
+  font-family: "Do Hyeon", sans-serif;
+  font-size: var(--l);
+  margin-bottom: var(--l);
+  color: var(--black);
+  font-weight: 400;
+  margin-top: 3rem;
+}
+
+.tabs-container {
+  display: flex;
+  gap: var(--m);
+  margin-bottom: var(--l);
+  border-bottom: 1px solid var(--medgrey);
+  padding-bottom: var(--s);
+}
+
+.tab-button {
+  padding: var(--s) var(--l);
+  border: none;
+  background: none;
+  font-size: var(--m);
+  color: var(--darkgrey);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.tab-button.active {
+  color: var(--primary);
+}
+
+.tab-button.active::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary);
+}
+
+.requests-container {
+  width: clamp(60%, 90%, 100%);
+  margin: 0 auto;
+}
+
+.request-card {
+  display: flex;
+  padding: var(--l);
+  background: var(--white);
+  border-radius: var(--m);
+  margin-bottom: var(--m);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: var(--l);
+}
+
+.card-image {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--s);
+}
+
+.card-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s);
+}
+
+.product-name {
+  font-size: var(--l);
+  font-weight: 600;
+  margin: 0;
+}
+
+.product-price {
+  color: var(--primary);
+  font-weight: 500;
+  margin: 0;
+}
+
+.product-description {
+  color: var(--darkgrey);
+  margin: 0;
+}
+
+.card-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: var(--s);
+  min-width: 120px;
+}
+
+.status-text {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.sent-date {
+  color: var(--darkgrey);
+  font-size: 14px;
+}
+
+.cancel-button {
+  padding: var(--s) var(--m);
+  background-color: var(--white);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancel-button:hover {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.send-request-button {
+  padding: var(--s) var(--m);
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.send-request-button:hover {
+  background-color: var(--darkgrey);
+}
+
+.request-modal .modal-content {
+  border-radius: var(--m);
+}
+
+.modal-cancel-button,
+.modal-submit-button {
+  padding: var(--s) var(--m);
+  border-radius: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 100px;
+}
+
+.modal-cancel-button {
+  background-color: var(--white);
+  border: 1px solid var(--medgrey);
+  color: var(--darkgrey);
+}
+
+.modal-submit-button {
+  background-color: var(--primary);
+  border: none;
+  color: var(--white);
+  margin-left: var(--m);
+}
+
+.modal-cancel-button:hover {
+  background-color: var(--medgrey);
+  color: var(--white);
+}
+
+.modal-submit-button:hover {
+  background-color: var(--darkgrey);
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s);
+  width: 100%;
+}
+
+.resend-button {
+  padding: var(--s) var(--m);
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.resend-button:hover {
+  background-color: var(--darkgrey);
+}
+
+.ready-status {
+  color: var(--primary);
+  font-weight: 500;
+  padding: var(--s) var(--m);
+  background-color: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: var(--m);
+  text-align: center;
+  width: 100%;
+}
+
+.edit-button {
+  padding: var(--s) var(--m);
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 9rem;
+}
+
+.delete-button {
+  padding: var(--s) var(--m);
+  background-color: var(--white);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 9rem;
+}
+
+.edit-button:hover {
+  background-color: var(--darkgrey);
+}
+
+.delete-button:hover {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* margin-bottom: var(--l); */
+}
+
+.add-item-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1.2rem;
+}
+
+.add-item-button:hover {
+  background: var(--darkgrey);
+  transform: scale(1.1);
+}
+
+.image-upload-container {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed var(--medgrey);
+  border-radius: var(--m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--m);
+  overflow: hidden;
+}
+
+.image-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s);
+  cursor: pointer;
+  color: var(--darkgrey);
+}

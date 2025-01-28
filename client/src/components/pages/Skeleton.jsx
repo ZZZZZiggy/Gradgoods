@@ -3,6 +3,10 @@ import ProductCard from "../modules/Card";
 import SearchProduct from "../modules/SearchProduct";
 import FilterCard from "../modules/filter";
 import Pagination from "../modules/Pagination";
+
+// import RangeSlider from "react-range-slider-input";
+// import "react-range-slider-input/dist/style.css";
+
 import "./Skeleton.css";
 
 const App = () => {
@@ -10,6 +14,7 @@ const App = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [filterStatus, setFilterStatus] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [noMatchMessage, setNoMatchMessage] = useState(false);
   const productsPerPage = 80;
 
   const handleFilterChange = () => {
@@ -23,7 +28,18 @@ const App = () => {
       const filtered = products.filter((product) =>
         product.name.toLowerCase().includes(value.toLowerCase())
       );
-      setFilteredProducts(filtered);
+      if (filtered.length === 0) {
+        setNoMatchMessage(true);
+        setFilteredProducts([]);
+
+        // Reset after 3 seconds
+        setTimeout(() => {
+          setNoMatchMessage(false);
+          setFilteredProducts(products);
+        }, 3000);
+      } else {
+        setFilteredProducts(filtered);
+      }
     }
   };
 
@@ -97,6 +113,11 @@ const App = () => {
       <div>
         <SearchProduct product={matchProduct} onFilterChange={handleFilterChange} />
       </div>
+      {noMatchMessage && (
+        <div className="no-match-message">
+          No matching products found. Returning to all products...
+        </div>
+      )}
       <div className="product_container">
         {filterStatus && (
           <div className="filter_container">

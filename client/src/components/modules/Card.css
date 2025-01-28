@@ -1,7 +1,8 @@
 .card {
   display: flex;
+  width: min(100%, 16rem);
   flex-direction: column;
-  justify-content: flex-start; /* 改为flex-start确保内容从顶部开始 */
+  justify-content: flex-start;
   background-color: var(--grey);
   border-radius: var(--m);
   transition: 0.3s;
@@ -56,4 +57,91 @@
 }
 .button:hover {
   background-color: var(--darkgrey);
+}
+
+/* Modal Styles */
+.product-modal {
+  border-radius: var(--l);
+}
+
+.modal-header {
+  padding: var(--l);
+  border-bottom: 1px solid var(--medgrey);
+}
+
+.modal-title {
+  font-size: var(--l);
+  font-weight: 600;
+  color: var(--black);
+}
+
+.modal-body {
+  padding: var(--l);
+}
+
+.modal-image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--m);
+  margin-bottom: var(--m);
+}
+
+.modal-details p {
+  margin: var(--s) 0;
+  font-size: var(--m);
+}
+
+.modal-description {
+  color: var(--black);
+}
+
+.modal-price {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.modal-owner {
+  color: var(--darkgrey);
+}
+
+.modal-footer {
+  padding: var(--l);
+  border-top: 1px solid var(--medgrey);
+  display: flex;
+  gap: var(--m);
+}
+
+.modal-button {
+  padding: var(--s) var(--l);
+  border-radius: var(--m);
+  border: none;
+  font-size: var(--m);
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 120px;
+}
+
+.modal-button.primary {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.modal-button.secondary {
+  background-color: var(--white);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.modal-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button.primary:hover {
+  background-color: var(--darkgrey);
+}
+
+.modal-button.secondary:hover {
+  background-color: var(--primary);
+  color: var(--white);
 }

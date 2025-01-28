@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-import { Card, Button, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
+import RangeSlider from "react-range-slider-input";
+import "react-range-slider-input/dist/style.css";
+import "./filter.css";
 
 const FilterCard = ({ onApplyFilter }) => {
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 201 });
   const [category, setCategory] = useState("all");
   const [place, setPlace] = useState({ min: 0, max: 5 });
+
+  const today = new Date();
+  const oneYearLater = new Date();
+  oneYearLater.setFullYear(today.getFullYear() + 1);
+
   const [dateRange, setDateRange] = useState({
-    min: new Date().toISOString().split("T")[0],
-    max: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    min: today.toISOString().split("T")[0],
+    max: oneYearLater.toISOString().split("T")[0],
   });
 
   const categories = ["Pickup", "Home Delivery"];
@@ -17,99 +25,131 @@ const FilterCard = ({ onApplyFilter }) => {
   };
 
   const handleReset = () => {
-    setPriceRange({ min: 0, max: 1000 });
+    setPriceRange({ min: 0, max: 201 });
+    setPlace({ min: 0, max: 5 });
+    setDateRange({
+      min: today.toISOString().split("T")[0],
+      max: oneYearLater.toISOString().split("T")[0],
+    });
     setCategory("all");
   };
-  const handlePlace = () => {
-    setPlace({ min: 0, max: 5 });
-  };
   return (
-    <Card className="filter-card">
-      <Card.Body>
-        <Card.Title>Filter Products</Card.Title>
+    <div className="filter-wrapper">
+      <div className="filter-content">
+        <h2 className="filter-title" style={{ marginBottom: "var(--l)" }}>
+          Filtered By
+        </h2>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>
-              Price Range: ${priceRange.min} - ${priceRange.max}
-            </Form.Label>
-            <div className="d-flex flex-column gap-2">
-              <Form.Range
-                value={priceRange.min}
-                onChange={(e) => setPriceRange({ ...priceRange, min: parseInt(e.target.value) })}
-                min={0}
-                max={1000}
-              />
-              <Form.Range
-                value={priceRange.max}
-                onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) })}
-                min={0}
-                max={1000}
-              />
+            <Form.Label className="filter-subtitle">Price Range:</Form.Label>
+            <div className="range-container">
+              <div className="price-labels-container">
+                {priceRange.min === priceRange.max ? (
+                  <span
+                    className="price-label single-value"
+                    style={{
+                      left: `${(priceRange.min / 201) * 100}%`,
+                      transform: "translateX(-50%)",
+                    }}
+                  >
+                    ${priceRange.min === 201 && priceRange.max === 201 ? "200+" : priceRange.min}
+                  </span>
+                ) : (
+                  <>
+                    <span
+                      className="price-label"
+                      style={{
+                        left: `${(priceRange.min / 201) * 100}%`,
+                        transform: "translateX(-50%)",
+                      }}
+                    >
+                      ${priceRange.min}
+                    </span>
+                    <span
+                      className="price-label"
+                      style={{
+                        left: `${(priceRange.max / 201) * 100}%`,
+                        transform: "translateX(-50%)",
+                      }}
+                    >
+                      ${priceRange.max === 201 ? "200+" : priceRange.max}
+                    </span>
+                  </>
+                )}
+              </div>
+              <div className="range-control-container">
+                <div className="range-input-container">
+                  <RangeSlider
+                    className="range-slider"
+                    value={[priceRange.min, priceRange.max]}
+                    onInput={(values) => setPriceRange({ min: values[0], max: values[1] })}
+                    min={0}
+                    max={201}
+                  />
+                </div>
+              </div>
             </div>
           </Form.Group>
-
           <Form.Group className="mb-3">
-            <Form.Label>Category</Form.Label>
-            <div>
-              {categories.map((cat) => (
-                <Form.Check
-                  key={cat}
-                  type="radio"
-                  id={`category-${cat}`}
-                  label={cat}
-                  checked={category === cat}
-                  onChange={() => setCategory(cat)}
-                />
-              ))}
-            </div>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Direction Range: {place.min} - {place.max} miles
-            </Form.Label>
-            <div className="d-flex flex-column gap-2">
-              <Form.Range
-                value={place.min}
-                onChange={(e) => setPlace({ ...place, min: parseInt(e.target.value) })}
-                min={0}
-                max={5}
-              />
-              <Form.Range
-                value={place.max}
-                onChange={(e) => setPlace({ ...place, max: parseInt(e.target.value) })}
-                min={0}
-                max={5}
-              />
-            </div>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Date Range</Form.Label>
-            <div className="d-flex gap-2">
-              <Form.Control
-                type="date"
-                value={dateRange.min}
-                onChange={(e) => setDateRange({ ...dateRange, min: e.target.value })}
-              />
+            <Form.Label className="filter-subtitle">Date:</Form.Label>
+            <div className="date-container">
               <Form.Control
                 type="date"
                 value={dateRange.max}
+                min={dateRange.min}
+                max={oneYearLater.toISOString().split("T")[0]}
                 onChange={(e) => setDateRange({ ...dateRange, max: e.target.value })}
               />
             </div>
           </Form.Group>
-          <div className="d-flex gap-2">
-            <Button variant="primary" onClick={handleApply}>
-              Apply
-            </Button>
-            <Button variant="secondary" onClick={handleReset}>
-              Reset
-            </Button>
-          </div>
+          <Form.Group className="mb-3">
+            <Form.Label className="filter-subtitle">Method</Form.Label>
+            <div className="method-container">
+              {categories.map((cat) => (
+                <div className="custom-checkbox-container" key={cat}>
+                  <input
+                    type="radio"
+                    id={`category-${cat}`}
+                    name="category"
+                    className="custom-checkbox"
+                    checked={category === cat}
+                    onChange={() => setCategory(cat)}
+                  />
+                  <label htmlFor={`category-${cat}`}>{cat}</label>
+                </div>
+              ))}
+            </div>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label className="filter-subtitle">Distance in: {place.max} miles</Form.Label>
+            <div className="range-container">
+              <div className="range-control-container">
+                <div className="range-start-point"></div>
+                <div className="range-input-container">
+                  <RangeSlider
+                    className="range-slider single-thumb"
+                    value={[0, place.max]}
+                    onInput={(values) => setPlace({ min: 0, max: values[1] })}
+                    min={0}
+                    max={5}
+                    step={0.5}
+                    rangeSlideDisabled={true}
+                  />
+                </div>
+              </div>
+            </div>
+          </Form.Group>
         </Form>
-      </Card.Body>
-    </Card>
+        <div className="button-container-fixed">
+          <button type="button" className="custom-button apply-button" onClick={handleApply}>
+            Apply
+          </button>
+          <button type="button" className="custom-button reset-button" onClick={handleReset}>
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

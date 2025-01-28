@@ -19,8 +19,8 @@ const NewPostInput = ({ onSubmit, defaultText, onFilterChange }) => {
 
   return (
     <div className="SearchBar">
-      <button type="submit" className="NewPostInput-filter u-pointer" onClick={ShowFilter}>
-        Filter
+      <button type="button" className="NewPostInput-filter u-pointer" onClick={ShowFilter}>
+        <i className="fas fa-bars"></i>
       </button>
       <input
         type="text"
@@ -29,8 +29,8 @@ const NewPostInput = ({ onSubmit, defaultText, onFilterChange }) => {
         onChange={handleChange}
         className="NewPostInput-input"
       />
-      <button type="submit" className="NewPostInput-button u-pointer" onClick={handleSubmit}>
-        Submit
+      <button type="button" className="NewPostInput-button u-pointer" onClick={handleSubmit}>
+        <i className="fas fa-search"></i>
       </button>
     </div>
   );

@@ -3,13 +3,10 @@
   width: 70%;
   align-items: center;
   justify-content: center;
-  margin-top: 40px;
-  margin-bottom: 40px;
-  margin-left: auto;
-  margin-right: auto;
-  border-radius: var(--xs);
-  background-color: var(--white);
-  border: 1px solid var(--g);
+  margin: 40px auto;
+  border-radius: 28px;
+  background-color: var(--medgrey);
+  border: 1px solid var(--medgrey);
 }
 
 .NewPostInput-input,
@@ -25,25 +22,47 @@
 
 .NewPostInput-input {
   flex-grow: 1;
-  transition: box-shadow 0.1s;
+  font-family: "Funnel Sans";
+  font-size: var(--m);
+  padding: var(--s) var(--m);
+  height: 56px;
+  border: none;
+  background-color: var(--medgrey);
   z-index: 1;
 }
 
-.NewPostInput-input:focus-within {
-  border-color: var(--primary--dim);
-  box-shadow: 0 0 0 var(--xs) rgba(0, 123, 255, 0.25);
+.NewPostInput-button,
+.NewPostInput-filter {
+  font-family: "Funnel Sans";
+  font-size: var(--m);
+  padding: var(--s) var(--m);
+  height: 56px;
+  border: none;
+  background-color: var(--medgrey);
+  color: var(--black);
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.NewPostInput-filter {
+  border-radius: 28px 0 0 28px;
 }
 
 .NewPostInput-button {
   border-radius: 0 28px 28px 0;
 }
-.NewPostInput-filter {
-  transition: color 0.1s, background 0.1s;
-  border-radius: 28px 0 0 28px;
-}
 
 .NewPostInput-button:hover,
 .NewPostInput-filter:hover {
-  color: var(--white);
   background-color: var(--primary);
+  color: var(--white);
+}
+
+.NewPostInput-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary);
 }

@@ -1,0 +1,365 @@
+import React, { useState } from "react";
+import Modal from "react-bootstrap/Modal";
+import Form from "react-bootstrap/Form";
+import "./Cart.css";
+
+const Sell = () => {
+  const [activeTab, setActiveTab] = useState("available");
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [requestDetails, setRequestDetails] = useState({
+    price: "",
+    message: "",
+  });
+  const [sentRequests, setSentRequests] = useState(new Set());
+  const tabs = ["available", "negotiating", "deal"];
+
+  const [requests, setRequests] = useState([
+    {
+      id: 1,
+      image: "/1.jpg",
+      name: "Sample Product 1",
+      price: 99.99,
+      description: "Product description here",
+      listDate: new Date().toLocaleDateString(),
+      status: "available", // new status for available items
+      method: "Pickup",
+    },
+    {
+      id: 2,
+      image: "/1.jpg",
+      name: "Sample Product 2",
+      price: 149.99,
+      description: "Product description here",
+      sentDate: "2024-01-20",
+      replyDate: "2024-01-21",
+      acceptStatus: false, // negotiating
+      method: "Delivery",
+      status: "available",
+    },
+    {
+      id: 3,
+      image: "/1.jpg",
+      name: "Sample Product 3",
+      price: 199.99,
+      description: "Product description here",
+      sentDate: "2024-01-20",
+      replyDate: "2024-01-21",
+      acceptStatus: true, // deal
+      method: "Pickup",
+      status: "available",
+    },
+  ]);
+
+  const [showNewItemModal, setShowNewItemModal] = useState(false);
+  const [newItem, setNewItem] = useState({
+    image: null,
+    imagePreview: null,
+    name: "",
+    price: "",
+    description: "",
+    method: "Pickup", // default method
+  });
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewItem({
+        ...newItem,
+        image: file,
+        imagePreview: URL.createObjectURL(file),
+      });
+    }
+  };
+
+  const handleNewItemSubmit = () => {
+    const newItemWithDefaults = {
+      ...newItem,
+      id: Date.now(), // temporary ID
+      listDate: new Date().toLocaleDateString(),
+      status: "available",
+    };
+    setRequests((prev) => [...prev, newItemWithDefaults]);
+    setShowNewItemModal(false);
+    setNewItem({
+      image: null,
+      imagePreview: null,
+      name: "",
+      price: "",
+      description: "",
+      method: "Pickup",
+    });
+  };
+
+  const handleCancel = (id) => {
+    console.log("Cancelling deal for item:", id);
+  };
+
+  const handleShowRequestModal = (item) => {
+    setSelectedItem(item);
+    setShowRequestModal(true);
+  };
+
+  const handleCloseRequestModal = () => {
+    setShowRequestModal(false);
+    setRequestDetails({ price: "", message: "" });
+  };
+
+  const handleSendRequest = () => {
+    console.log("Sending request for item:", selectedItem.id, requestDetails);
+    setSentRequests((prev) => new Set([...prev, selectedItem.id]));
+    handleCloseRequestModal();
+  };
+
+  const handleAccept = (itemId) => {
+    setRequests((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            acceptStatus: true,
+            replyDate: new Date().toLocaleDateString(),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleDeny = (itemId) => {
+    setRequests((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            acceptStatus: false,
+            replyDate: new Date().toLocaleDateString(),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleEdit = (itemId) => {
+    console.log("Editing item:", itemId);
+  };
+
+  const handleDelete = (itemId) => {
+    setRequests((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const filteredRequests = {
+    available: requests.filter((item) => item.status === "available"),
+    negotiating: requests.filter((item) => item.acceptStatus === false),
+    deal: requests.filter((item) => item.acceptStatus === true),
+  };
+
+  const renderCardStatus = (item, tab) => {
+    switch (tab) {
+      case "available":
+        return (
+          <>
+            <span className="status-text">Listed on: {item.listDate}</span>
+            <div className="button-group">
+              <button className="edit-button" onClick={() => handleEdit(item.id)}>
+                Edit Listing
+              </button>
+              <button className="delete-button" onClick={() => handleDelete(item.id)}>
+                Delete Listing
+              </button>
+            </div>
+          </>
+        );
+
+      case "negotiating":
+        return (
+          <div className="button-group">
+            <button className="edit-button" onClick={() => handleAccept(item.id)}>
+              Accept
+            </button>
+            <button className="delete-button" onClick={() => handleDeny(item.id)}>
+              Deny
+            </button>
+          </div>
+        );
+
+      case "deal":
+        return (
+          <>
+            <span className="status-text">Deal Confirmed</span>
+            <span className="sent-date">Confirmed on: {item.replyDate}</span>
+            <span className="ready-status">
+              Ready for {item.method === "Pickup" ? "Pickup" : "Delivery"}
+            </span>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="cart-container">
+      <div className="header-container">
+        <h1 className="cart-title">My Items</h1>
+        <button className="add-item-button" onClick={() => setShowNewItemModal(true)}>
+          <i className="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <div className="tabs-container">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={`tab-button ${activeTab === tab ? "active" : ""}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      <div className="requests-container">
+        {filteredRequests[activeTab]?.map((item) => (
+          <div key={item.id} className="request-card">
+            <div className="card-image">
+              <img src={item.image} alt={item.name} />
+            </div>
+
+            <div className="card-details">
+              <h3 className="product-name">{item.name}</h3>
+              <p className="product-price">${item.price}</p>
+              <p className="product-description">{item.description}</p>
+            </div>
+
+            <div className="card-status">{renderCardStatus(item, activeTab)}</div>
+          </div>
+        ))}
+      </div>
+
+      <Modal
+        show={showRequestModal}
+        onHide={handleCloseRequestModal}
+        centered
+        className="request-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Send Request</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Your Offer Price ($)</Form.Label>
+              <Form.Control
+                type="number"
+                value={requestDetails.price}
+                onChange={(e) => setRequestDetails({ ...requestDetails, price: e.target.value })}
+                min="0"
+                step="0.01"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Message</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={requestDetails.message}
+                onChange={(e) => setRequestDetails({ ...requestDetails, message: e.target.value })}
+                placeholder="Enter your message to the seller..."
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="modal-cancel-button" onClick={handleCloseRequestModal}>
+            Cancel
+          </button>
+          <button className="modal-submit-button" onClick={handleSendRequest}>
+            Send Request
+          </button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showNewItemModal}
+        onHide={() => setShowNewItemModal(false)}
+        centered
+        className="product-modal"
+      >
+        <Modal.Header closeButton className="modal-header">
+          <Modal.Title className="modal-title">Add New Item</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="modal-body">
+          <div className="image-upload-container">
+            {newItem.imagePreview ? (
+              <img src={newItem.imagePreview} alt="Preview" className="modal-image" />
+            ) : (
+              <label className="image-upload-label">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: "none" }}
+                />
+                <i className="fas fa-cloud-upload-alt"></i>
+                <span>Click to upload image</span>
+              </label>
+            )}
+          </div>
+          <div className="modal-details">
+            <Form.Group className="mb-3">
+              <Form.Label>Item Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={newItem.name}
+                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Price ($)</Form.Label>
+              <Form.Control
+                type="number"
+                value={newItem.price}
+                onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                min="0"
+                step="0.01"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={newItem.description}
+                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Method</Form.Label>
+              <Form.Select
+                value={newItem.method}
+                onChange={(e) => setNewItem({ ...newItem, method: e.target.value })}
+              >
+                <option value="Pickup">Pickup</option>
+                <option value="Delivery">Delivery</option>
+              </Form.Select>
+            </Form.Group>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="modal-footer">
+          <button
+            className="modal-button primary"
+            onClick={handleNewItemSubmit}
+            disabled={!newItem.image || !newItem.name || !newItem.price || !newItem.description}
+          >
+            Finish
+          </button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
+};
+
+export default Sell;
