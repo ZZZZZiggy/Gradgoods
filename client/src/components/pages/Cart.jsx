@@ -13,12 +13,14 @@ const Cart = () => {
   });
   const [sentRequests, setSentRequests] = useState(new Set());
   const tabs = ["pending", "negotiating", "deal"];
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Combined sample data
   const allRequests = [
     {
       id: 1,
-      image: "/1.jpg",
+      image: "/IMG_E103515C1907-1.jpeg",
       name: "Sample Product 1",
       price: 99.99,
       description: "Product description here",
@@ -77,7 +79,13 @@ const Cart = () => {
   };
 
   const handleProductClick = (item) => {
-    // TODO: open product detail without any cart buttons
+    setSelectedProduct(item);
+    setShowProductModal(true);
+  };
+
+  const handleCloseProductModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
   };
 
   // Filter requests based on status
@@ -139,7 +147,7 @@ const Cart = () => {
               <button className="resend-button" onClick={() => handleShowRequestModal(item)}>
                 Resend Request
               </button>
-              <button className="cancel-button" onClick={() => handleCancel(item.id)}>
+              <button className="cancel-button" onClick={() => handleRemoveFromCart(item.id)}>
                 Cancel Deal
               </button>
             </div>
@@ -239,6 +247,23 @@ const Cart = () => {
             Send Request
           </button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={showProductModal} onHide={handleCloseProductModal} className="product-modal">
+        <Modal.Header closeButton className="modal-header">
+          <Modal.Title className="modal-title">{selectedProduct?.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="modal-body">
+          <img src={selectedProduct?.image} alt={selectedProduct?.name} className="modal-image" />
+          <div className="modal-details">
+            <p className="modal-description">
+              <strong>Description:</strong> {selectedProduct?.description}
+            </p>
+            <p className="modal-price">
+              <strong>Price:</strong> ${selectedProduct?.price}
+            </p>
+          </div>
+        </Modal.Body>
       </Modal>
     </div>
   );

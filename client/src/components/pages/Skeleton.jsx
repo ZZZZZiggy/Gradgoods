@@ -50,7 +50,7 @@ const App = () => {
       name: "Product 1",
       prize: 100,
       description: "pick up by April 32",
-      image: "/1.jpg",
+      image: "/IMG_E103515C1907-1.jpeg",
     };
     const product2 = {
       id: 2,
