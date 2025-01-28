@@ -4,9 +4,9 @@ import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 import "./filter.css";
 
-const FilterCard = ({ onApplyFilter }) => {
+const FilterCard = ({ onFilterUpdate }) => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 201 });
-  const [category, setCategory] = useState("all");
+  const [method, setMethod] = useState("all");
   const [place, setPlace] = useState({ min: 0, max: 5 });
 
   const today = new Date();
@@ -18,10 +18,10 @@ const FilterCard = ({ onApplyFilter }) => {
     max: oneYearLater.toISOString().split("T")[0],
   });
 
-  const categories = ["Pickup", "Home Delivery"];
+  const categories = ["Pickup", "Delivery"];
 
   const handleApply = () => {
-    onApplyFilter({ priceRange, category, place, dateRange });
+    onFilterUpdate({ priceRange, method, place, dateRange });
   };
 
   const handleReset = () => {
@@ -31,7 +31,7 @@ const FilterCard = ({ onApplyFilter }) => {
       min: today.toISOString().split("T")[0],
       max: oneYearLater.toISOString().split("T")[0],
     });
-    setCategory("all");
+    setMethod("all");
   };
   return (
     <div className="filter-wrapper">
@@ -112,8 +112,8 @@ const FilterCard = ({ onApplyFilter }) => {
                     id={`category-${cat}`}
                     name="category"
                     className="custom-checkbox"
-                    checked={category === cat}
-                    onChange={() => setCategory(cat)}
+                    checked={method === cat}
+                    onChange={() => setMethod(cat)}
                   />
                   <label htmlFor={`category-${cat}`}>{cat}</label>
                 </div>

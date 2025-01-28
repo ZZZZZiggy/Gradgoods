@@ -17,6 +17,28 @@
   display: flex;
   justify-content: center;
   gap: var(--m);
+  max-height: 45rem;
+  overflow-y: auto;
+  padding-right: var(--s);
+}
+
+/* 自定义滚动条样式 */
+.items_filter_opened::-webkit-scrollbar {
+  width: 8px;
+}
+
+.items_filter_opened::-webkit-scrollbar-track {
+  background: var(--white);
+  border-radius: 4px;
+}
+
+.items_filter_opened::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+.items_filter_opened::-webkit-scrollbar-thumb:hover {
+  background: var(--darkgrey);
 }
 
 .items_filter_closed {
@@ -75,24 +97,28 @@
 }
 
 .no-match-message {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
-  color: var(--black);
+  color: var(--white);
   background-color: var(--primary);
-  padding: var(--s);
-  margin: var(--m) auto;
+  padding: var(--s) var(--l);
   border-radius: var(--s);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: fit-content;
   animation: fadeIn 0.3s ease-in;
+  z-index: 1000;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translate(-50%, -20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
 }

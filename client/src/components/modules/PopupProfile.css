@@ -53,8 +53,8 @@
 }
 
 .popup-avatar:hover img {
-  width: calc(20vw * 0.3); /* 30% of popup width */
-  height: calc(20vw * 0.3); /* 30% of popup width */
+  width: 7rem; /* 30% of popup width */
+  height: 7rem; /* 30% of popup width */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 

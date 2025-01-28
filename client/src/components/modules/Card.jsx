@@ -24,7 +24,9 @@ const ProductCard = ({ product }) => {
         <Card.Body className="body">
           <div className="header">
             <Card.Title className="cardh2">{product.name}</Card.Title>
-            <Card.Text className="content">{product.description}</Card.Text>
+            <Card.Text className="content">
+              {product.method} by {product.dateby}
+            </Card.Text>
           </div>
           <div className="footer">
             <Card.Title className="prize">${product.prize}</Card.Title>
