@@ -3,6 +3,7 @@ import ProductCard from "../modules/Card";
 import SearchProduct from "../modules/SearchProduct";
 import FilterCard from "../modules/filter";
 import Pagination from "../modules/Pagination";
+import { get } from "../../utilities";
 
 import "./Skeleton.css";
 
@@ -49,7 +50,6 @@ const App = () => {
       }
       if (filter.place) {
         filtered = filtered.filter((product) => {
-          // Fix: Use filter.place instead of filterConditions.place
           if (filter.place.max === 5) {
             return product.diatance >= filter.place.min;
           }
@@ -71,83 +71,18 @@ const App = () => {
   };
 
   const handleFilterUpdate = (newFilters) => {
-    // 直接使用newFilters而不是等待状态更新
     matchProduct("", newFilters);
-    // 更新状态供后续使用
     setFilterConditions(newFilters);
   };
 
+  // fetch all products
   useEffect(() => {
-    const product1 = {
-      id: 1,
-      owner: "seller1",
-      name: "Product 1",
-      prize: 100,
-      method: "Delivery",
-      dateby: "2024-01-20",
-      description: "pick up by April 32",
-      image: "/IMG_E103515C1907-1.jpeg",
-      diatance: 1,
-    };
-    const product2 = {
-      id: 2,
-      owner: "seller2",
-      name: "Product 2",
-      prize: 200,
-      method: "Delivery",
-      dateby: "2024-01-20",
-      description: "pick up by April 32",
-      image: "/1.jpg",
-      diatance: 1,
-    };
-    const product3 = {
-      id: 3,
-      owner: "seller3",
-      name: "Product 3",
-      prize: 300,
-      method: "Delivery",
-      dateby: "2024-01-20",
-      description: "pick up by April 32",
-      image: "/1.jpg",
-      diatance: 1,
-    };
-    const product4 = {
-      id: 4,
-      owner: "seller1",
-      name: "Product 1",
-      prize: 100,
-      method: "Delivery",
-      dateby: "2024-01-20",
-      description: "pick up by April 32",
-      image: "/1.jpg",
-      diatance: 1,
-    };
-    const product5 = {
-      id: 5,
-      owner: "seller2",
-      name: "Product 2",
-      prize: 200,
-      method: "Delivery",
-      dateby: "2024-01-20",
-      description: "pick up by April 32",
-      image: "/1.jpg",
-      diatance: 1,
-    };
-    const product6 = {
-      id: 6,
-      owner: "seller3",
-      name: "Product 3",
-      prize: 300,
-      method: "Delivery",
-      dateby: "2024-01-20",
-      description: "pick up by April 32",
-      image: "/1.jpg",
-      diatance: 1,
-    };
-    const hardcodedProducts = [product1, product2, product3, product4, product5, product6];
-
-    setProducts(hardcodedProducts);
-    setFilteredProducts(hardcodedProducts);
+    get("/api/products").then((productObjs) => {
+      // filter out accepted products
+      const availableProducts = productObjs.filter((product) => !product.status.isAccepted);
+      setProducts(availableProducts);
+      setFilteredProducts(availableProducts);
+    });
   }, []);
 
   // product pagination

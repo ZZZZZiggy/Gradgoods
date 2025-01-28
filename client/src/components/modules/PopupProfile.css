@@ -173,3 +173,38 @@
 .modal-submit-button:hover {
   background-color: var(--darkgrey);
 }
+
+.address-modal .pac-container {
+  z-index: 1500;
+}
+
+.address-modal .form-control {
+  width: 100%;
+}
+
+/* Google Places Autocomplete styles */
+.pac-container {
+  z-index: 9999 !important;
+  position: fixed !important;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pac-item {
+  cursor: pointer;
+  padding: 8px;
+}
+
+.pac-item:hover {
+  background-color: #f5f5f5;
+}
+
+/* Ensure the modal is above other elements */
+.address-modal {
+  z-index: 1050;
+}
+
+.modal-open {
+  overflow: hidden;
+}

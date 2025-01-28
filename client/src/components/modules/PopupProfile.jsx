@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
+import { get, post } from "../../utilities";
 import "./PopupProfile.css";
 
 const PopupProfile = ({ isHovered }) => {
@@ -13,6 +14,50 @@ const PopupProfile = ({ isHovered }) => {
   });
   const [emailError, setEmailError] = useState("");
   const [codeError, setCodeError] = useState("");
+
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [address, setAddress] = useState("");
+  const [addressError, setAddressError] = useState("");
+  const autocompleteRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    get("/api/address").then((addr) => {
+      if (addr.formatted_address) {
+        setAddress(addr.formatted_address);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (showAddressModal && window.google) {
+      console.log("Google Maps API loaded");
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+        componentRestrictions: { country: "US" },
+        fields: ["address_components", "formatted_address", "geometry"],
+        types: ["address"],
+      });
+
+      console.log("Autocomplete initialized");
+
+      autocomplete.addListener("place_changed", () => {
+        console.log("Place changed");
+        const place = autocomplete.getPlace();
+        console.log("Selected place:", place);
+        if (place.geometry) {
+          setAddress(place.formatted_address);
+          setAddressError("");
+        }
+      });
+
+      autocompleteRef.current = autocomplete;
+    } else {
+      console.log("Google Maps API not loaded", {
+        showAddressModal,
+        googleExists: !!window.google,
+      });
+    }
+  }, [showAddressModal]);
 
   const validateEmail = (email) => {
     const eduEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.edu$/;
@@ -53,6 +98,44 @@ const PopupProfile = ({ isHovered }) => {
     handleCloseModal();
   };
 
+  const handleAddressClick = (e) => {
+    e.preventDefault();
+    setShowAddressModal(true);
+  };
+
+  const handleCloseAddressModal = () => {
+    setShowAddressModal(false);
+    setAddressError("");
+  };
+
+  const handleSaveAddress = () => {
+    if (!address.trim()) {
+      setAddressError("Please enter a valid address");
+      return;
+    }
+
+    const place = autocompleteRef.current?.getPlace();
+    if (!place || !place.geometry) {
+      setAddressError("Please select an address from the suggestions");
+      return;
+    }
+
+    const addressData = {
+      formatted_address: place.formatted_address,
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    };
+
+    post("/api/address", addressData)
+      .then(() => {
+        handleCloseAddressModal();
+      })
+      .catch((err) => {
+        console.log("Error saving address:", err);
+        setAddressError("Failed to save address. Please try again.");
+      });
+  };
+
   return (
     <>
       <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
@@ -74,6 +157,11 @@ const PopupProfile = ({ isHovered }) => {
           </div>
           <div className="popup-item">
             <Link to="/sell">Sell</Link>
+          </div>
+          <div className="popup-item">
+            <Link to="#" onClick={handleAddressClick}>
+              Set Address
+            </Link>
           </div>
         </div>
 
@@ -153,6 +241,44 @@ const PopupProfile = ({ isHovered }) => {
             onClick={verificationStep === 1 ? handleVerifyEmail : handleVerifyCode}
           >
             {verificationStep === 1 ? "Send Code" : "Verify"}
+          </button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showAddressModal}
+        onHide={handleCloseAddressModal}
+        centered
+        className="address-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Set Your Address</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Address</Form.Label>
+              <Form.Control
+                ref={inputRef}
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                isInvalid={!!addressError}
+                placeholder="Enter your address"
+              />
+              <Form.Control.Feedback type="invalid">{addressError}</Form.Control.Feedback>
+              <Form.Text className="text-muted">
+                Start typing and select an address from the suggestions
+              </Form.Text>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="modal-cancel-button" onClick={handleCloseAddressModal}>
+            Cancel
+          </button>
+          <button className="modal-submit-button" onClick={handleSaveAddress}>
+            Save Address
           </button>
         </Modal.Footer>
       </Modal>

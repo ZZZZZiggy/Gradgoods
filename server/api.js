@@ -11,6 +11,7 @@ const express = require("express");
 
 // import models so we can interact with the database
 const User = require("./models/user");
+const Address = require("./models/address");
 
 // import authentication library
 const auth = require("./auth");
@@ -42,6 +43,165 @@ router.post("/initsocket", (req, res) => {
 // |------------------------------|
 // | write your API methods below!|
 // |------------------------------|
+
+// datafiles
+const product1 = {
+  _id: 1,
+  ownerId: 1,
+  owner: "seller1",
+  name: "Product 1",
+  prize: 100,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/IMG_E103515C1907-1.jpeg",
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+  diatance: 1,
+};
+const product2 = {
+  _id: 2,
+  ownerId: 2,
+  owner: "seller2",
+  name: "Product 2",
+  prize: 200,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  status: {
+    isAccepted: true,
+    acceptedBy: null,
+    acceptedAt: null,
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+  diatance: 1,
+};
+const product3 = {
+  _id: 3,
+  ownerId: 3,
+  owner: "seller3",
+  name: "Product 3",
+  prize: 300,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+  diatance: 1,
+};
+const product4 = {
+  _id: 4,
+  ownerId: 1,
+  owner: "seller1",
+  name: "Product 1",
+  prize: 100,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+  diatance: 1,
+};
+const product5 = {
+  _id: 5,
+  ownerId: 2,
+  owner: "seller2",
+  name: "Product 2",
+  prize: 200,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+  diatance: 1,
+};
+const product6 = {
+  _id: 6,
+  ownerId: 3,
+  owner: "seller3",
+  name: "Product 3",
+  prize: 300,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+  diatance: 1,
+};
+const products = [product1, product2, product3, product4, product5, product6];
+
+router.get("/products", (req, res) => {
+  try {
+    res.send(products);
+  } catch (err) {
+    console.log(`Error in /api/products: ${err}`);
+    res.status(500).send({ error: "Error fetching products" });
+  }
+});
+
+router.post("/address", auth.ensureLoggedIn, async (req, res) => {
+  try {
+    const { formatted_address, lat, lng } = req.body;
+
+    // Update or create address
+    const address = await Address.findOneAndUpdate(
+      { userId: req.user._id },
+      {
+        formatted_address,
+        lat,
+        lng,
+        updatedAt: Date.now(),
+      },
+      { upsert: true, new: true }
+    );
+
+    res.send(address);
+  } catch (err) {
+    console.log(`Error saving address: ${err}`);
+    res.status(500).send({ error: "Error saving address" });
+  }
+});
+
+router.get("/address", auth.ensureLoggedIn, async (req, res) => {
+  try {
+    const address = await Address.findOne({ userId: req.user._id });
+    res.send(address || {});
+  } catch (err) {
+    console.log(`Error fetching address: ${err}`);
+    res.status(500).send({ error: "Error fetching address" });
+  }
+});
 
 // anything else falls to this "not found" case
 router.all("*", (req, res) => {
