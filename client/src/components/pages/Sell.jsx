@@ -256,14 +256,19 @@ const Sell = () => {
       setIsSubmitting(true);
       setOperationError(null);
 
-      // Send delete request to server
-      await post("/api/products/delete", { id: itemId });
+      // 使用 _id 而不是 id
+      const response = await post("/api/products/delete", { id: itemId });
 
-      // Update local state
-      setRequests((prev) => prev.filter((item) => item.id !== itemId));
+      if (response) {
+        // 更新本地状态
+        setRequests((prev) => prev.filter((item) => item._id !== itemId));
+        setShowNewItemModal(false);
+      } else {
+        throw new Error("Failed to delete product");
+      }
     } catch (err) {
       setOperationError("Failed to delete product. Please try again.");
-      console.error(err);
+      console.error("Delete error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -316,7 +321,7 @@ const Sell = () => {
                   item={item}
                   tab={activeTab}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={() => handleDelete(item._id)} // 使用 _id
                   onAccept={handleAccept}
                   onDeny={handleDeny}
                 />

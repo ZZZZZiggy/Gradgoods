@@ -169,6 +169,7 @@ router.post("/products", async (req, res) => {
   try {
     const buyer = people.find((p) => p._id === PERSONID);
     const buyerLocation = buyer?.address?.location?.coordinates;
+    const currentDate = new Date().toISOString().split("T")[0]; // 只保留 YYYY-MM-DD
 
     const newProduct = new ProductModel({
       ownerId: PERSONID,
@@ -176,7 +177,7 @@ router.post("/products", async (req, res) => {
       name: req.body.name,
       price: req.body.price,
       method: req.body.method,
-      dateby: new Date().toISOString().split("T")[0],
+      dateby: currentDate,
       description: req.body.description,
       image: req.body.image, // Expecting base64 string from frontend
       location: {

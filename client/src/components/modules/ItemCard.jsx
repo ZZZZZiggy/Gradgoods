@@ -1,12 +1,16 @@
 import React from "react";
 
 const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
+  const formatDate = (dateString) => {
+    return dateString.split("T")[0]; // 只显示 YYYY-MM-DD
+  };
+
   const renderCardStatus = () => {
     switch (tab) {
       case "available":
         return (
           <>
-            <span className="status-text">Listed on: {item.createdAt}</span>
+            <span className="status-text">Listed on: {formatDate(item.createdAt)}</span>
             <div className="button-group">
               <button className="edit-button" onClick={() => onEdit(item.id)}>
                 Edit Listing
@@ -34,7 +38,7 @@ const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
         return (
           <>
             <span className="status-text">Deal Confirmed</span>
-            <span className="sent-date">Confirmed on: {item.replyDate}</span>
+            <span className="sent-date">Confirmed on: {formatDate(item.replyDate)}</span>
             <span className="ready-status">
               Ready for {item.method === "Pickup" ? "Pickup" : "Delivery"}
             </span>
@@ -63,9 +67,7 @@ const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
                 <span className="original-price">(Original: ${item.price})</span>
               </p>
               <p className="offer-message">{offer.message}</p>
-              <p className="offer-date">
-                Offered on: {new Date(offer.createdAt).toLocaleDateString()}
-              </p>
+              <p className="offer-date">Offered on: {formatDate(offer.createdAt)}</p>
             </div>
 
             <div className="card-status">
