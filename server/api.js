@@ -45,152 +45,7 @@ router.post("/initsocket", (req, res) => {
 // |------------------------------|
 const PERSONID = 1; // Temporary user ID for testing
 // datafiles
-const product1 = {
-  _id: 1,
-  ownerId: 1,
-  owner: "seller1",
-  name: "Product 1",
-  price: 100,
-  method: "Delivery",
-  dateby: "2024-01-20",
-  description: "pick up by April 32",
-  image: "/IMG_E103515C1907-1.jpeg",
-  location: {
-    type: "Point",
-    coordinates: [42.3601, -71.0942], // Boston coordinates
-  },
-  distance: 0,
-  status: {
-    isAccepted: false,
-    acceptedBy: null,
-    acceptedAt: null,
-    offers: [],
-  },
-  createdAt: "2024-01-20",
-  updatedAt: "2024-01-20",
-};
-const product2 = {
-  _id: 2,
-  ownerId: 2,
-  owner: "seller2",
-  name: "Product 2",
-  price: 200,
-  method: "Delivery",
-  dateby: "2024-01-20",
-  description: "pick up by April 32",
-  image: "/1.jpg",
-  location: {
-    type: "Point",
-    coordinates: [42.3736, -71.1097], // Cambridge coordinates
-  },
-  distance: 0,
-  status: {
-    isAccepted: false,
-    acceptedBy: null,
-    acceptedAt: null,
-    offers: [],
-  },
-  createdAt: "2024-01-20",
-  updatedAt: "2024-01-20",
-};
-const product3 = {
-  _id: 3,
-  ownerId: 3,
-  owner: "seller3",
-  name: "Product 3",
-  price: 300,
-  method: "Delivery",
-  dateby: "2024-01-20",
-  description: "pick up by April 32",
-  image: "/1.jpg",
-  location: {
-    type: "Point",
-    coordinates: [42.3654, -71.1033], // MIT coordinates
-  },
-  distance: 0,
-  status: {
-    isAccepted: false,
-    acceptedBy: null,
-    acceptedAt: null,
-    offers: [],
-  },
-  createdAt: "2024-01-20",
-  updatedAt: "2024-01-20",
-};
-const product4 = {
-  _id: 4,
-  ownerId: 1,
-  owner: "seller1",
-  name: "Product 1",
-  price: 100,
-  method: "Delivery",
-  dateby: "2024-01-20",
-  description: "pick up by April 32",
-  image: "/1.jpg",
-  location: {
-    type: "Point",
-    coordinates: [42.377, -71.1167], // Harvard coordinates
-  },
-  distance: 0,
-  status: {
-    isAccepted: false,
-    acceptedBy: null,
-    acceptedAt: null,
-    offers: [],
-  },
-  createdAt: "2024-01-20",
-  updatedAt: "2024-01-20",
-};
-const product5 = {
-  _id: 5,
-  ownerId: 2,
-  owner: "seller2",
-  name: "Product 2",
-  price: 200,
-  method: "Delivery",
-  dateby: "2024-01-20",
-  description: "pick up by April 32",
-  image: "/1.jpg",
-  location: {
-    type: "Point",
-    coordinates: [42.3505, -71.1054], // Brookline coordinates
-  },
-  distance: 0,
-  status: {
-    isAccepted: false,
-    acceptedBy: null,
-    acceptedAt: null,
-    offers: [],
-  },
-  createdAt: "2024-01-20",
-  updatedAt: "2024-01-20",
-};
-const product6 = {
-  _id: 6,
-  ownerId: 3,
-  owner: "seller3",
-  name: "Product 3",
-  price: 300,
-  method: "Delivery",
-  dateby: "2024-01-20",
-  description: "pick up by April 32",
-  image: "/1.jpg",
-  location: {
-    type: "Point",
-    coordinates: [42.3875, -71.0995], // Somerville coordinates
-  },
-  distance: 0,
-  status: {
-    isAccepted: false,
-    acceptedBy: null,
-    acceptedAt: null,
-    offers: [],
-  },
-  createdAt: "2024-01-20",
-  updatedAt: "2024-01-20",
-};
-const products = [product1, product2, product3, product4, product5, product6];
-console.log(products);
+
 const people = [
   {
     _id: 1,
@@ -242,9 +97,8 @@ const people = [
 const calculateDistance = (coords1, coords2) => {
   if (!coords1 || !coords2) return 0;
 
-  // 注意：坐标顺序应该是 [latitude, longitude]
-  const [lon1, lat1] = coords1; // 修改这里
-  const [lon2, lat2] = coords2; // 修改这里
+  const [lon1, lat1] = coords1;
+  const [lon2, lat2] = coords2;
 
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -262,14 +116,26 @@ const calculateDistance = (coords1, coords2) => {
 
   return Math.round(distance * 10) / 10;
 };
-router.get("/allproducts", (req, res) => {
+
+// import mongoose models
+const ProductModel = require("./models/product");
+
+// router.get("/allusers", (req, res) => {
+//   UserModel.find({}).then((people) => res.send(people));
+// });
+// router.get("/allproducts", (req, res) => {
+//   ProductModel.find({}).then((products) => res.send(products));
+// });
+
+// routers
+router.get("/allproducts", async (req, res) => {
   try {
-    // Get user location from test user
     const user = people.find((p) => p._id === PERSONID);
     const userLocation = user?.address?.location?.coordinates;
-    // Calculate distances for all products
+
+    const products = await ProductModel.find({});
     const productsWithDistance = products.map((product) => ({
-      ...product,
+      ...product.toObject(),
       distance: calculateDistance(userLocation, product.location?.coordinates) || 0,
     }));
 
@@ -279,23 +145,17 @@ router.get("/allproducts", (req, res) => {
     res.status(500).send({ error: "Error fetching products" });
   }
 });
-router.get("/products", (req, res) => {
+
+router.get("/products", async (req, res) => {
   try {
-    // Get user location from test user
     const user = people.find((p) => p._id === PERSONID);
     const userLocation = user?.address?.location?.coordinates;
 
-    // Filter products to only show those owned by PERSONID
-    const userProducts = products.filter((product) => product.ownerId === PERSONID);
-
-    // Calculate distances for filtered products
-    const productsWithDistance = userProducts.map((product) => {
-      const distance = calculateDistance(userLocation, product.location?.coordinates);
-      return {
-        ...product,
-        distance: distance || 0,
-      };
-    });
+    const products = await ProductModel.find({ ownerId: PERSONID });
+    const productsWithDistance = products.map((product) => ({
+      ...product.toObject(),
+      distance: calculateDistance(userLocation, product.location?.coordinates) || 0,
+    }));
 
     res.send(productsWithDistance);
   } catch (err) {
@@ -305,39 +165,26 @@ router.get("/products", (req, res) => {
 });
 
 // Modify the product creation route
-router.post("/products", (req, res) => {
+router.post("/products", async (req, res) => {
   try {
-    const currentDate = new Date().toISOString().split("T")[0];
-    const _id = products.length + 1;
-
-    // Get buyer's location
     const buyer = people.find((p) => p._id === PERSONID);
     const buyerLocation = buyer?.address?.location?.coordinates;
 
-    const newProduct = {
-      _id,
+    const newProduct = new ProductModel({
       ownerId: PERSONID,
       owner: "seller1",
       name: req.body.name,
       price: req.body.price,
       method: req.body.method,
-      dateby: currentDate,
+      dateby: new Date().toISOString().split("T")[0],
       description: req.body.description,
       image: req.body.image,
       location: req.body.location,
       distance: calculateDistance(buyerLocation, req.body.location?.coordinates),
-      status: {
-        isAccepted: false,
-        acceptedBy: null,
-        acceptedAt: null,
-        offers: [],
-      },
-      createdAt: currentDate,
-      updatedAt: currentDate,
-    };
+    });
 
-    products.push(newProduct);
-    res.send(newProduct);
+    const savedProduct = await newProduct.save();
+    res.send(savedProduct);
   } catch (err) {
     console.log(`Error creating product: ${err}`);
     res.status(500).send({ error: "Error creating product" });
@@ -345,16 +192,21 @@ router.post("/products", (req, res) => {
 });
 
 // Add two new endpoints
-router.post("/products/edit", (req, res) => {
+router.post("/products/edit", async (req, res) => {
   try {
     const { id, updates } = req.body;
-    const productIndex = products.findIndex((p) => p._id === id);
+    const updatedProduct = await ProductModel.findByIdAndUpdate(
+      id,
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    );
 
-    if (productIndex === -1) {
+    if (!updatedProduct) {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    if (updates.price !== products[productIndex].price) {
+    // Still handle cart price updates with in-memory people array
+    if (updates.price !== updatedProduct.price) {
       people.forEach((person) => {
         if (person.cart?.items) {
           person.cart.items = person.cart.items.map((item) => {
@@ -371,31 +223,22 @@ router.post("/products/edit", (req, res) => {
       });
     }
 
-    // Update the product
-    products[productIndex] = {
-      ...products[productIndex],
-      ...updates,
-      updatedAt: new Date().toISOString().split("T")[0],
-    };
-
-    res.send(products[productIndex]);
+    res.send(updatedProduct);
   } catch (err) {
     console.error("Error editing product:", err);
     res.status(500).send({ error: "Error editing product" });
   }
 });
 
-router.post("/products/delete", (req, res) => {
+router.post("/products/delete", async (req, res) => {
   try {
     const { id } = req.body;
-    const productIndex = products.findIndex((p) => p._id === id);
+    const deletedProduct = await ProductModel.findByIdAndDelete(id);
 
-    if (productIndex === -1) {
+    if (!deletedProduct) {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    // Remove the product
-    const deletedProduct = products.splice(productIndex, 1)[0];
     res.send(deletedProduct);
   } catch (err) {
     console.error("Error deleting product:", err);

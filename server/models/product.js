@@ -32,8 +32,15 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
     image: {
-      type: String,
+      type: String, // This will store Base64 encoded image data
       required: true,
+      validate: {
+        validator: function (v) {
+          // Basic validation for Base64 string
+          return /^data:image\/[a-zA-Z]+;base64,/.test(v);
+        },
+        message: "Image must be a valid Base64 encoded string",
+      },
     },
     location: {
       type: {
