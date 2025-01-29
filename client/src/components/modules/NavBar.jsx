@@ -29,7 +29,7 @@ const NavBar = () => {
       <nav className="NavBar-container">
         <div className="NavBar-content">
           <div>
-            <Link to="/" className="NavBar-title u-inlineBlock">
+            <Link to="/market" className="NavBar-title u-inlineBlock">
               GradGoods
             </Link>
           </div>

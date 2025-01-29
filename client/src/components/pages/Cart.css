@@ -8,10 +8,10 @@
 .cart-title {
   font-family: "Do Hyeon", sans-serif;
   font-size: var(--l);
-  margin-bottom: var(--l);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   color: var(--black);
   font-weight: 400;
-  margin-top: 3rem;
 }
 
 .tabs-container {

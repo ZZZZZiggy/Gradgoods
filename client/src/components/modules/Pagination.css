@@ -3,6 +3,7 @@
   justify-content: center;
   align-items: center;
   align-content: center;
+  pointer-events: auto;
   /* Remove padding here as it's handled by pagination-fixed-container */
 }
 
@@ -20,6 +21,7 @@
   background-color: rgba(240, 240, 240, 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
 }
 
 .pagination-xsmall {

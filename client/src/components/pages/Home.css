@@ -1,0 +1,65 @@
+.home-wrapper {
+  height: calc(100vh - 5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+/* .home-content {
+  display: flex;
+  gap: 4rem;
+  max-width: 1200px;
+  width: 90%;
+  align-items: center;
+} */
+
+/* .image-section {
+  flex: 1;
+  max-width: 600px;
+} */
+
+.home-image {
+  width: auto;
+  height: 80vh;
+  object-fit: contain;
+}
+
+.explore-button {
+  padding: 0.5rem 2rem;
+  font-size: 1.2rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--l);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.explore-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  background-color: var(--darkgrey);
+}
+
+.text-overlay {
+  position: absolute;
+  text-align: center;
+  right: 25%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.text-overlay h1 {
+  font-family: "Do Hyeon";
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  color: var(--black);
+}
+
+.text-overlay p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: var(--black);
+}

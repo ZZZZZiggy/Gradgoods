@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import "./Cart.css";
+import { post } from "../../utilities";
 
 const Sell = () => {
   const [activeTab, setActiveTab] = useState("available");
@@ -75,23 +76,46 @@ const Sell = () => {
     }
   };
 
-  const handleNewItemSubmit = () => {
+  const handleNewItemSubmit = async () => {
+    const currentDate = new Date().toISOString().split("T")[0];
     const newItemWithDefaults = {
-      ...newItem,
-      id: Date.now(), // temporary ID
-      listDate: new Date().toLocaleDateString(),
-      status: "available",
+      _id: Date.now(), // 临时ID
+      ownerId: 1, // TODO: 应该从用户信息中获取
+      owner: "seller1", // TODO: 应该从用户信息中获取
+      name: newItem.name,
+      prize: parseFloat(newItem.price),
+      method: newItem.method,
+      dateby: currentDate,
+      description: newItem.description,
+      image: newItem.imagePreview,
+      status: {
+        isAccepted: false,
+        acceptedBy: null,
+        acceptedAt: null,
+      },
+      createdAt: currentDate,
+      updatedAt: currentDate,
+      diatance: 1, // TODO: 应该根据用户地址计算
     };
-    setRequests((prev) => [...prev, newItemWithDefaults]);
-    setShowNewItemModal(false);
-    setNewItem({
-      image: null,
-      imagePreview: null,
-      name: "",
-      price: "",
-      description: "",
-      method: "Pickup",
-    });
+
+    try {
+      // 发送到服务器
+      const savedProduct = await post("/api/products", newItemWithDefaults);
+      setRequests((prev) => [...prev, savedProduct]);
+      setShowNewItemModal(false);
+      // 重置表单
+      setNewItem({
+        image: null,
+        imagePreview: null,
+        name: "",
+        price: "",
+        description: "",
+        method: "Pickup",
+      });
+    } catch (err) {
+      console.error("Failed to create product:", err);
+      // TODO: 显示错误消息给用户
+    }
   };
 
   const handleCancel = (id) => {

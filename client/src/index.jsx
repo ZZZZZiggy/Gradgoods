@@ -6,6 +6,7 @@ import Skeleton from "./components/pages/Skeleton";
 import NotFound from "./components/pages/NotFound";
 import Cart from "./components/pages/Cart";
 import Sell from "./components/pages/Sell";
+import Home from "./components/pages/Home";
 
 import {
   createBrowserRouter,
@@ -22,9 +23,11 @@ const GOOGLE_CLIENT_ID = "588092905346-2h7e1ig7imalt3s32u42jbc9tlqmg73f.apps.goo
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route errorElement={<NotFound />} element={<App />}>
-      <Route path="/" element={<Skeleton />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/market" element={<Skeleton />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/sell" element={<Sell />} />
+      <Route path="/home" element={<Home />} />
     </Route>
   )
 );

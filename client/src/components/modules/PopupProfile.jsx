@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { get, post } from "../../utilities";
 import "./PopupProfile.css";
 
 const PopupProfile = ({ isHovered }) => {
+  const navigate = useNavigate();
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationStep, setVerificationStep] = useState(1); // 1 for email, 2 for code
   const [verificationDetails, setVerificationDetails] = useState({
@@ -136,6 +137,13 @@ const PopupProfile = ({ isHovered }) => {
       });
   };
 
+  const handleNavigation = (path) => {
+    return (e) => {
+      e.preventDefault();
+      navigate(path, { replace: true });
+    };
+  };
+
   return (
     <>
       <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
@@ -153,10 +161,14 @@ const PopupProfile = ({ isHovered }) => {
             <Link to="/orders">Orders</Link>
           </div> */}
           <div className="popup-item">
-            <Link to="/cart">Cart</Link>
+            <Link to="#" onClick={handleNavigation("/cart")}>
+              Cart
+            </Link>
           </div>
           <div className="popup-item">
-            <Link to="/sell">Sell</Link>
+            <Link to="#" onClick={handleNavigation("/sell")}>
+              Sell
+            </Link>
           </div>
           <div className="popup-item">
             <Link to="#" onClick={handleAddressClick}>
@@ -280,6 +292,7 @@ const PopupProfile = ({ isHovered }) => {
           <button className="modal-submit-button" onClick={handleSaveAddress}>
             Save Address
           </button>
+          Save Address
         </Modal.Footer>
       </Modal>
     </>

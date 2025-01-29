@@ -170,6 +170,40 @@ router.get("/products", (req, res) => {
   }
 });
 
+// 添加新商品
+router.post("/products", (req, res) => {
+  // 暂时移除 auth.ensureLoggedIn 方便测试
+  try {
+    const currentDate = new Date().toISOString().split("T")[0];
+    const newProduct = {
+      _id: products.length + 1,
+      ownerId: 1, // 临时ID
+      owner: "seller1", // 临时名称
+      name: req.body.name,
+      prize: req.body.prize,
+      method: req.body.method,
+      dateby: currentDate,
+      description: req.body.description,
+      image: req.body.image,
+      status: {
+        isAccepted: false,
+        acceptedBy: null,
+        acceptedAt: null,
+      },
+      createdAt: currentDate,
+      updatedAt: currentDate,
+      diatance: 1,
+    };
+
+    products.push(newProduct);
+    console.log("New product added:", newProduct); // 添加调试日志
+    res.send(newProduct);
+  } catch (err) {
+    console.log(`Error creating product: ${err}`);
+    res.status(500).send({ error: "Error creating product" });
+  }
+});
+
 router.post("/address", auth.ensureLoggedIn, async (req, res) => {
   try {
     const { formatted_address, lat, lng } = req.body;
