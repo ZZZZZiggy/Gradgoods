@@ -36,11 +36,8 @@ const Sell = () => {
           return;
         }
 
-        // filter user-specific products
-        const userProducts = productObjs.filter((product) => product.ownerId === PERSONID);
-
-        // construct categorizedProducts
-        const categorizedProducts = userProducts.map((product) => ({
+        // Remove the filter since backend already filters by PERSONID
+        const categorizedProducts = productObjs.map((product) => ({
           ...product,
           id: product._id,
           listDate: product.createdAt,

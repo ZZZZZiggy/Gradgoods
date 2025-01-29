@@ -94,7 +94,7 @@ const App = () => {
 
   // fetch all products
   useEffect(() => {
-    get("/api/products").then((productObjs) => {
+    get("/api/allproducts").then((productObjs) => {
       // filter out accepted products
       const availableProducts = productObjs.filter((product) => !product.status.isAccepted);
       setProducts(availableProducts);

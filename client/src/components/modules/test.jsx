@@ -1,450 +1,751 @@
-import React, { useState, useEffect } from "react";
-import Modal from "react-bootstrap/Modal";
-import Form from "react-bootstrap/Form";
-import "./Cart.css";
-import { get, post } from "../../utilities";
+/*
+|--------------------------------------------------------------------------
+| api.js -- server routes
+|--------------------------------------------------------------------------
+|
+| This file defines the routes for your server.
+|
+*/
 
-const Sell = () => {
-  const CURRENT_USER_ID = 1;
-  const [activeTab, setActiveTab] = useState("available");
-  const [products, setProducts] = useState([]); // 替换原来的 requests state
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [requestDetails, setRequestDetails] = useState({
-    price: "",
-    message: "",
-  });
-  const [sentRequests, setSentRequests] = useState(new Set());
-  const tabs = ["available", "negotiating", "deal"];
+const express = require("express");
 
-  const [showNewItemModal, setShowNewItemModal] = useState(false);
-  const [newItem, setNewItem] = useState({
-    image: null,
-    imagePreview: null,
-    name: "",
-    price: "",
-    description: "",
-    method: "Pickup", // default method
-  });
+// import models so we can interact with the database
+const User = require("./models/user");
+const Address = require("./models/address");
 
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editItem, setEditItem] = useState(null);
+// import authentication library
+const auth = require("./auth");
 
-  // 添加数据获取
-  useEffect(() => {
-    loadUserProducts();
-  }, []);
+// api endpoints: all these paths will be prefixed with "/api/"
+const router = express.Router();
 
-  const loadUserProducts = async () => {
-    try {
-      const userProducts = await get(`/api/user-products/${CURRENT_USER_ID}`);
-      setProducts(userProducts);
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-    }
-  };
+//initialize socket
+const socketManager = require("./server-socket");
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewItem({
-        ...newItem,
-        image: file,
-        imagePreview: URL.createObjectURL(file),
-      });
-    }
-  };
+router.post("/login", auth.login);
+router.post("/logout", auth.logout);
+router.get("/whoami", (req, res) => {
+  if (!req.user) {
+    // not logged in
+    return res.send({});
+  }
 
-  // construct new product
-  const handleNewItemSubmit = async () => {
+  res.send(req.user);
+});
+
+router.post("/initsocket", (req, res) => {
+  // do nothing if user not logged in
+  if (req.user)
+    socketManager.addUser(req.user, socketManager.getSocketFromSocketID(req.body.socketid));
+  res.send({});
+});
+
+// |------------------------------|
+// | write your API methods below!|
+// |------------------------------|
+const PERSONID = 1; // Temporary user ID for testing
+// datafiles
+const product1 = {
+  _id: 1,
+  ownerId: 1,
+  owner: "seller1",
+  name: "Product 1",
+  price: 100,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/IMG_E103515C1907-1.jpeg",
+  location: {
+    type: "Point",
+    coordinates: [42.3601, -71.0942], // Boston coordinates
+  },
+  distance: 0,
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+    offers: [],
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+};
+const product2 = {
+  _id: 2,
+  ownerId: 2,
+  owner: "seller2",
+  name: "Product 2",
+  price: 200,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3736, -71.1097], // Cambridge coordinates
+  },
+  distance: 0,
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+    offers: [],
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+};
+const product3 = {
+  _id: 3,
+  ownerId: 3,
+  owner: "seller3",
+  name: "Product 3",
+  price: 300,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3654, -71.1033], // MIT coordinates
+  },
+  distance: 0,
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+    offers: [],
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+};
+const product4 = {
+  _id: 4,
+  ownerId: 1,
+  owner: "seller1",
+  name: "Product 1",
+  price: 100,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.377, -71.1167], // Harvard coordinates
+  },
+  distance: 0,
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+    offers: [],
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+};
+const product5 = {
+  _id: 5,
+  ownerId: 2,
+  owner: "seller2",
+  name: "Product 2",
+  price: 200,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3505, -71.1054], // Brookline coordinates
+  },
+  distance: 0,
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+    offers: [],
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+};
+const product6 = {
+  _id: 6,
+  ownerId: 3,
+  owner: "seller3",
+  name: "Product 3",
+  price: 300,
+  method: "Delivery",
+  dateby: "2024-01-20",
+  description: "pick up by April 32",
+  image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3875, -71.0995], // Somerville coordinates
+  },
+  distance: 0,
+  status: {
+    isAccepted: false,
+    acceptedBy: null,
+    acceptedAt: null,
+    offers: [],
+  },
+  createdAt: "2024-01-20",
+  updatedAt: "2024-01-20",
+};
+const products = [product1, product2, product3, product4, product5, product6];
+console.log(products);
+const people = [
+  {
+    _id: 1,
+    userName: "Laowang",
+    verified: true,
+    email: "xiang949@mit.edu",
+    avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+    address: {
+      street: "String",
+      city: "String",
+      zip: "02139",
+      location: {
+        type: "Point",
+        coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+      },
+    },
+    createdAt: "2024-01-20",
+    updatedAt: "2024-01-20",
+    cart: {
+      items: [],
+      lastUpdated: "2024-01-20",
+    },
+  },
+  {
+    _id: 2,
+    userName: "Xiaowang",
+    verified: true,
+    email: "xiang949@mit.edu",
+    avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+    address: {
+      street: "String",
+      city: "String",
+      zip: "02139",
+      location: {
+        type: "Point",
+        coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+      },
+    },
+    cart: {
+      items: [],
+      lastUpdated: "2024-01-20",
+    },
+    createdAt: "2024-01-20",
+    updatedAt: "2024-01-20",
+  },
+];
+
+// Add helper function for distance calculation
+const calculateDistance = (coords1, coords2) => {
+  if (!coords1 || !coords2) return 0;
+
+  // 注意：坐标顺序应该是 [latitude, longitude]
+  const [lon1, lat1] = coords1; // 修改这里
+  const [lon2, lat2] = coords2; // 修改这里
+
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return Math.round(distance * 10) / 10;
+};
+
+router.get("/products", (req, res) => {
+  try {
+    // Get user location from test user
+    const user = people.find((p) => p._id === PERSONID);
+    const userLocation = user?.address?.location?.coordinates;
+
+    // Filter products to only show those owned by PERSONID
+    const userProducts = products.filter((product) => product.ownerId === PERSONID);
+
+    // Calculate distances for filtered products
+    const productsWithDistance = userProducts.map((product) => {
+      const distance = calculateDistance(userLocation, product.location?.coordinates);
+      return {
+        ...product,
+        distance: distance || 0,
+      };
+    });
+
+    res.send(productsWithDistance);
+  } catch (err) {
+    console.error("Detailed error in /api/products:", err);
+    res.status(500).send({ error: "Error fetching products" });
+  }
+});
+
+// Modify the product creation route
+router.post("/products", (req, res) => {
+  try {
     const currentDate = new Date().toISOString().split("T")[0];
-    const newItemWithDefaults = {
-      _id: Date.now(), // 临时ID
-      ownerId: 1, // TODO: 应该从用户信息中获取
-      owner: "seller1", // TODO: 应该从用户信息中获取
-      name: newItem.name,
-      prize: parseFloat(newItem.price),
-      method: newItem.method,
+    const _id = products.length + 1;
+
+    // Get buyer's location
+    const buyer = people.find((p) => p._id === PERSONID);
+    const buyerLocation = buyer?.address?.location?.coordinates;
+
+    const newProduct = {
+      _id,
+      ownerId: PERSONID,
+      owner: "seller1",
+      name: req.body.name,
+      price: req.body.price,
+      method: req.body.method,
       dateby: currentDate,
-      description: newItem.description,
-      image: newItem.imagePreview,
+      description: req.body.description,
+      image: req.body.image,
+      location: req.body.location,
+      distance: calculateDistance(buyerLocation, req.body.location?.coordinates),
       status: {
         isAccepted: false,
         acceptedBy: null,
         acceptedAt: null,
+        offers: [],
       },
       createdAt: currentDate,
       updatedAt: currentDate,
-      diatance: 1, // TODO: 应该根据用户地址计算
     };
 
-    try {
-      // 发送到服务器
-      const savedProduct = await post("/api/products", newItemWithDefaults);
-      setProducts((prev) => [...prev, savedProduct]);
-      setShowNewItemModal(false);
-      // 重置表单
-      setNewItem({
-        image: null,
-        imagePreview: null,
-        name: "",
-        price: "",
-        description: "",
-        method: "Pickup",
+    products.push(newProduct);
+    res.send(newProduct);
+  } catch (err) {
+    console.log(`Error creating product: ${err}`);
+    res.status(500).send({ error: "Error creating product" });
+  }
+});
+
+// Add two new endpoints
+router.post("/products/edit", (req, res) => {
+  try {
+    const { id, updates } = req.body;
+    const productIndex = products.findIndex((p) => p._id === id);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    if (updates.price !== products[productIndex].price) {
+      people.forEach((person) => {
+        if (person.cart?.items) {
+          person.cart.items = person.cart.items.map((item) => {
+            if (item.productId === id) {
+              return {
+                ...item,
+                currentPrice: updates.price,
+                priceChanged: true,
+              };
+            }
+            return item;
+          });
+        }
       });
-    } catch (err) {
-      console.error("Failed to create product:", err);
     }
-  };
 
-  const handleCancel = (id) => {
-    console.log("Cancelling deal for item:", id);
-  };
+    // Update the product
+    products[productIndex] = {
+      ...products[productIndex],
+      ...updates,
+      updatedAt: new Date().toISOString().split("T")[0],
+    };
 
-  const handleShowRequestModal = (item) => {
-    setSelectedItem(item);
-    setShowRequestModal(true);
-  };
+    res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error editing product:", err);
+    res.status(500).send({ error: "Error editing product" });
+  }
+});
 
-  const handleCloseRequestModal = () => {
-    setShowRequestModal(false);
-    setRequestDetails({ price: "", message: "" });
-  };
+router.post("/products/delete", (req, res) => {
+  try {
+    const { id } = req.body;
+    const productIndex = products.findIndex((p) => p._id === id);
 
-  const handleSendRequest = () => {
-    console.log("Sending request for item:", selectedItem.id, requestDetails);
-    setSentRequests((prev) => new Set([...prev, selectedItem.id]));
-    handleCloseRequestModal();
-  };
-
-  const handleAccept = (itemId) => {
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === itemId) {
-          return {
-            ...item,
-            acceptStatus: true,
-            replyDate: new Date().toLocaleDateString(),
-          };
-        }
-        return item;
-      })
-    );
-  };
-
-  const handleDeny = (itemId) => {
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === itemId) {
-          return {
-            ...item,
-            acceptStatus: false,
-            replyDate: new Date().toLocaleDateString(),
-          };
-        }
-        return item;
-      })
-    );
-  };
-
-  const handleEdit = (itemId) => {
-    const item = products.find((item) => item.id === itemId);
-    setEditItem({
-      ...item,
-      imagePreview: item.image,
-    });
-    setShowEditModal(true);
-  };
-
-  const handleEditSubmit = () => {
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === editItem.id) {
-          return {
-            ...editItem,
-            image: editItem.imagePreview,
-          };
-        }
-        return item;
-      })
-    );
-
-    // 清理工作
-    if (editItem.imagePreview && editItem.imagePreview !== editItem.image) {
-      URL.revokeObjectURL(editItem.imagePreview);
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
     }
-    setShowEditModal(false);
-    setEditItem(null);
-  };
 
-  const handleEditImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // 释放旧的预览URL
-      if (editItem.imagePreview && editItem.imagePreview !== editItem.image) {
-        URL.revokeObjectURL(editItem.imagePreview);
+    // Remove the product
+    const deletedProduct = products.splice(productIndex, 1)[0];
+    res.send(deletedProduct);
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.status(500).send({ error: "Error deleting product" });
+  }
+});
+
+router.post("/products/accept-offer", (req, res) => {
+  try {
+    const { productId, offerIndex } = req.body;
+    const productIndex = products.findIndex((p) => p._id === productId);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    const product = products[productIndex];
+    const acceptedOffer = product.status.offers[offerIndex];
+
+    // Update product status
+    products[productIndex] = {
+      ...product,
+      status: {
+        ...product.status,
+        isAccepted: true,
+        acceptedBy: acceptedOffer.buyerId,
+        acceptedAt: new Date().toISOString(),
+        acceptedOffer: acceptedOffer,
+        offers: [], // Clear other offers
+      },
+    };
+
+    res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error accepting offer:", err);
+    res.status(500).send({ error: "Error accepting offer" });
+  }
+});
+
+router.post("/products/deny-offer", (req, res) => {
+  try {
+    const { productId, offerIndex } = req.body;
+    const productIndex = products.findIndex((p) => p._id === productId);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    const product = products[productIndex];
+    const updatedOffers = [...product.status.offers];
+    updatedOffers.splice(offerIndex, 1);
+
+    // Update product
+    products[productIndex] = {
+      ...product,
+      status: {
+        ...product.status,
+        offers: updatedOffers,
+        Accepted: false,
+      },
+    };
+
+    res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error denying offer:", err);
+    res.status(500).send({ error: "Error denying offer" });
+  }
+});
+
+router.post("/products/deny-offer", (req, res) => {
+  try {
+    const { productId, offerIndex } = req.body;
+    const productIndex = products.findIndex((p) => p._id === productId);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    const product = products[productIndex];
+    const offer = product.status.offers[offerIndex];
+
+    // 更新offer的状态为false
+    offer.Accepted = false;
+
+    // 更新购物车中的相应商品状态
+    const user = people.find((p) => p._id === offer.buyerId);
+    if (user && user.cart) {
+      const cartItem = user.cart.items.find((item) => item.productId === productId);
+      if (cartItem) {
+        cartItem.lastOfferAccepted = false; // 记录offer被拒绝
       }
-      setEditItem({
-        ...editItem,
-        image: file, // 保存文件对象
-        imagePreview: URL.createObjectURL(file), // 创建新的预览URL
-      });
     }
-  };
 
-  const handleDelete = (itemId) => {
-    setProducts((prev) => prev.filter((item) => item.id !== itemId));
-  };
+    res.send(product);
+  } catch (err) {
+    console.error("Error denying offer:", err);
+    res.status(500).send({ error: "Error denying offer" });
+  }
+});
 
-  const availableProducts = products.filter(
-    (product) => product.ownerId === CURRENT_USER_ID && !product.status.isAccepted
-  );
+router.post("/address", (req, res) => {
+  try {
+    const userId = PERSONID; // Using the test user ID
+    const { street, city, zip, lat, lng } = req.body;
 
-  // 简化渲染函数
-  const renderCardStatus = (item) => (
-    <>
-      <span className="status-text">Listed on: {item.createdAt}</span>
-      <div className="button-group">
-        <button className="edit-button" onClick={() => handleEdit(item._id)}>
-          Edit Listing
-        </button>
-        <button className="delete-button" onClick={() => handleDelete(item._id)}>
-          Delete Listing
-        </button>
-      </div>
-    </>
-  );
+    const user = people.find((p) => p._id === userId);
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
 
-  return (
-    <div className="cart-container">
-      <div className="header-container">
-        <h1 className="cart-title">My Items</h1>
-        <button className="add-item-button" onClick={() => setShowNewItemModal(true)}>
-          <i className="fas fa-plus"></i>
-        </button>
-      </div>
+    // Update user's address with the new format
+    user.address = {
+      street: street,
+      city: city,
+      zip: zip,
+      location: {
+        type: "Point",
+        coordinates: [lat, lng], // [latitude, longitude]
+      },
+    };
 
-      <div className="requests-container">
-        {availableProducts.map((item) => (
-          <div key={item._id} className="request-card">
-            <div className="card-image">
-              <img src={item.image} alt={item.name} />
-            </div>
+    user.updatedAt = new Date().toISOString();
 
-            <div className="card-details">
-              <h3 className="product-name">{item.name}</h3>
-              <p className="product-price">${item.prize}</p>
-              <p className="product-description">{item.description}</p>
-            </div>
+    res.send(user.address);
+  } catch (err) {
+    console.log(`Error saving address: ${err}`);
+    res.status(500).send({ error: "Error saving address" });
+  }
+});
 
-            <div className="card-status">{renderCardStatus(item)}</div>
-          </div>
-        ))}
-      </div>
+router.get("/address", (req, res) => {
+  try {
+    const userId = PERSONID; // Using the test user ID
+    const user = people.find((p) => p._id === userId);
 
-      <Modal
-        show={showRequestModal}
-        onHide={handleCloseRequestModal}
-        centered
-        className="request-modal"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Send Request</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Your Offer Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                value={requestDetails.price}
-                onChange={(e) => setRequestDetails({ ...requestDetails, price: e.target.value })}
-                min="0"
-                step="0.01"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={requestDetails.message}
-                onChange={(e) => setRequestDetails({ ...requestDetails, message: e.target.value })}
-                placeholder="Enter your message to the seller..."
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="modal-cancel-button" onClick={handleCloseRequestModal}>
-            Cancel
-          </button>
-          <button className="modal-submit-button" onClick={handleSendRequest}>
-            Send Request
-          </button>
-        </Modal.Footer>
-      </Modal>
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
 
-      <Modal
-        show={showNewItemModal}
-        onHide={() => setShowNewItemModal(false)}
-        centered
-        className="product-modal"
-      >
-        <Modal.Header closeButton className="modal-header">
-          <Modal.Title className="modal-title">Add New Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="modal-body">
-          <div className="image-upload-container">
-            {newItem.imagePreview ? (
-              <img src={newItem.imagePreview} alt="Preview" className="modal-image" />
-            ) : (
-              <label className="image-upload-label">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                />
-                <i className="fas fa-cloud-upload-alt"></i>
-                <span>Click to upload image</span>
-              </label>
-            )}
-          </div>
-          <div className="modal-details">
-            <Form.Group className="mb-3">
-              <Form.Label>Item Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={newItem.name}
-                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                value={newItem.price}
-                onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                min="0"
-                step="0.01"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Method</Form.Label>
-              <Form.Select
-                value={newItem.method}
-                onChange={(e) => setNewItem({ ...newItem, method: e.target.value })}
-              >
-                <option value="Pickup">Pickup</option>
-                <option value="Delivery">Delivery</option>
-              </Form.Select>
-            </Form.Group>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="modal-footer">
-          <button
-            className="modal-button primary"
-            onClick={handleNewItemSubmit}
-            disabled={!newItem.image || !newItem.name || !newItem.price || !newItem.description}
-          >
-            Finish
-          </button>
-        </Modal.Footer>
-      </Modal>
+    res.send(user.address || {});
+  } catch (err) {
+    console.log(`Error fetching address: ${err}`);
+    res.status(500).send({ error: "Error fetching address" });
+  }
+});
 
-      <Modal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        centered
-        className="product-modal"
-      >
-        <Modal.Header closeButton className="modal-header">
-          <Modal.Title className="modal-title">Edit Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="modal-body">
-          <div className="image-upload-container" style={{ cursor: "pointer" }}>
-            <label className="image-upload-label" style={{ width: "100%", height: "100%" }}>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleEditImageUpload}
-                style={{ display: "none" }}
-              />
-              {editItem?.imagePreview ? (
-                <img src={editItem.imagePreview} alt="Preview" className="modal-image" />
-              ) : (
-                <>
-                  <i className="fas fa-cloud-upload-alt"></i>
-                  <span>Click to upload image</span>
-                </>
-              )}
-            </label>
-          </div>
-          <div className="modal-details">
-            <Form.Group className="mb-3">
-              <Form.Label>Item Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={editItem?.name || ""}
-                onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                value={editItem?.price || ""}
-                onChange={(e) => setEditItem({ ...editItem, price: e.target.value })}
-                min="0"
-                step="0.01"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={editItem?.description || ""}
-                onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Method</Form.Label>
-              <Form.Select
-                value={editItem?.method || "Pickup"}
-                onChange={(e) => setEditItem({ ...editItem, method: e.target.value })}
-              >
-                <option value="Pickup">Pickup</option>
-                <option value="Delivery">Delivery</option>
-              </Form.Select>
-            </Form.Group>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="modal-footer">
-          <button className="modal-cancel-button" onClick={() => setShowEditModal(false)}>
-            Cancel
-          </button>
-          <button
-            className="modal-submit-button"
-            onClick={handleEditSubmit}
-            disabled={!editItem?.name || !editItem?.price || !editItem?.description}
-          >
-            Save Changes
-          </button>
-        </Modal.Footer>
-      </Modal>
-    </div>
-  );
-};
+router.get("/cart", (req, res) => {
+  try {
+    console.log("Fetching cart for user:", PERSONID);
+    const user = people.find((p) => p._id === PERSONID);
 
-export default Sell;
+    if (!user) {
+      console.log("User not found:", PERSONID);
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    if (!user.cart) {
+      console.log("No cart found for user:", PERSONID);
+      return res.send({ items: [] });
+    }
+
+    const cartWithDetails = {
+      ...user.cart,
+      items: user.cart.items
+        .map((item) => {
+          const product = products.find((p) => p._id === item.productId);
+          if (!product) {
+            console.log("Product not found:", item.productId);
+            return null;
+          }
+
+          // Update cart item status if product is accepted by this user
+          if (product.status.isAccepted && product.status.acceptedBy === PERSONID) {
+            item.status = "deal";
+          }
+
+          return {
+            ...item,
+            product,
+            priceChange: {
+              hasChanged: item.priceChanged,
+              difference: product.price - item.savedPrice,
+            },
+          };
+        })
+        .filter(Boolean),
+    };
+
+    console.log("Successfully fetched cart:", cartWithDetails);
+    res.send(cartWithDetails);
+  } catch (err) {
+    console.error("Detailed error in /api/cart:", err);
+    res.status(500).send({ error: "Error fetching cart data", details: err.message });
+  }
+});
+
+// Add to cart with pending status
+router.post("/cart/add", (req, res) => {
+  try {
+    const { productId } = req.body;
+    const userId = PERSONID; // 临时使用，之后改为 req.user._id
+
+    const user = people.find((p) => p._id === userId);
+    const product = products.find((p) => p._id === productId);
+
+    if (!user || !product) {
+      return res.status(404).send({ error: "User or product not found" });
+    }
+
+    // Add item to cart
+    if (!user.cart) {
+      user.cart = { items: [] };
+    }
+
+    // Check if item already exists in cart
+    const existingItem = user.cart.items.find((item) => item.productId === productId);
+    if (existingItem) {
+      return res.status(400).send({ error: "Item already in cart" });
+    }
+
+    // Add new item
+    const cartItem = {
+      productId,
+      addedAt: new Date().toISOString(),
+      savedPrice: product.price,
+      currentPrice: product.price,
+      priceChanged: false,
+      status: "pending",
+    };
+
+    user.cart.items.push(cartItem);
+    user.cart.lastUpdated = new Date().toISOString();
+
+    res.send(cartItem);
+  } catch (err) {
+    console.error("Error adding to cart:", err);
+    res.status(500).send({ error: "Error adding to cart" });
+  }
+});
+
+// Direct order with offer
+router.post("/cart/order", (req, res) => {
+  try {
+    const { productId, price, message } = req.body;
+    const userId = PERSONID; // 临时使用，之后改为 req.user._id
+
+    const user = people.find((p) => p._id === userId);
+    const product = products.find((p) => p._id === productId);
+
+    if (!user || !product) {
+      return res.status(404).send({ error: "User or product not found" });
+    }
+
+    // Add item to cart with deal status
+    if (!user.cart) {
+      user.cart = { items: [] };
+    }
+
+    // Create new cart item
+    const cartItem = {
+      productId,
+      addedAt: new Date().toISOString(),
+      savedPrice: product.price,
+      currentPrice: product.price,
+      priceChanged: false,
+      status: "deal",
+    };
+
+    // Update product status
+    const now = new Date().toISOString();
+    product.status = {
+      isAccepted: true,
+      acceptedBy: userId,
+      acceptedAt: now,
+      offers: [
+        {
+          price,
+          message,
+          createdAt: now,
+          buyerId: userId,
+          Accepted: true,
+        },
+      ],
+    };
+
+    // Update or add cart item
+    const existingItemIndex = user.cart.items.findIndex((item) => item.productId === productId);
+    if (existingItemIndex !== -1) {
+      user.cart.items[existingItemIndex] = cartItem;
+    } else {
+      user.cart.items.push(cartItem);
+    }
+
+    user.cart.lastUpdated = now;
+
+    res.send({ cartItem, product });
+  } catch (err) {
+    console.error("Error processing order:", err);
+    res.status(500).send({ error: "Error processing order" });
+  }
+});
+
+// Remove item from cart
+router.post("/cart/remove", (req, res) => {
+  try {
+    const { productId } = req.body;
+    const userId = PERSONID;
+
+    const user = people.find((p) => p._id === userId);
+    if (!user || !user.cart) {
+      return res.status(404).send({ error: "Cart not found" });
+    }
+
+    // Remove item from cart
+    user.cart.items = user.cart.items.filter((item) => item.productId !== productId);
+    user.cart.lastUpdated = new Date().toISOString();
+
+    res.send({ message: "Item removed successfully" });
+  } catch (err) {
+    console.error("Error removing from cart:", err);
+    res.status(500).send({ error: "Error removing item from cart" });
+  }
+});
+
+// Add offer to product and update cart status
+router.post("/cart/make-offer", (req, res) => {
+  try {
+    const { productId, price, message } = req.body;
+    const userId = PERSONID;
+
+    const user = people.find((p) => p._id === userId);
+    const product = products.find((p) => p._id === productId);
+
+    if (!user || !product) {
+      return res.status(404).send({ error: "User or product not found" });
+    }
+
+    const now = new Date().toISOString();
+    const newOffer = {
+      price,
+      message,
+      createdAt: now,
+      buyerId: userId,
+      Accepted: null,
+    };
+
+    product.status.offers.push(newOffer);
+
+    // Update cart item status and add offer status tracking
+    const cartItem = user.cart.items.find((item) => item.productId === productId);
+    if (cartItem) {
+      cartItem.status = "negotiating";
+      cartItem.lastOfferAccepted = null;
+    }
+
+    res.send({ product, cartItem });
+  } catch (err) {
+    console.error("Error making offer:", err);
+    res.status(500).send({ error: "Error making offer" });
+  }
+});
+
+// anything else falls to this "not found" case
+router.all("*", (req, res) => {
+  console.log(`API route not found: ${req.method} ${req.url}`);
+  res.status(404).send({ msg: "API route not found" });
+});
+console.log(people[0]);
+module.exports = router;

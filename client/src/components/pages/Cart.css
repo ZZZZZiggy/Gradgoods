@@ -461,3 +461,21 @@
   color: var(--medgrey);
   margin-left: var(--s);
 }
+
+.price-difference.increased {
+  color: var(--error);
+}
+
+.price-difference.decreased {
+  color: var(--success);
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: var(--medgrey);
+}
+
+.current-price {
+  font-weight: bold;
+  color: var(--primary);
+}

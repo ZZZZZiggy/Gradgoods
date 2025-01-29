@@ -6,11 +6,7 @@ const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
       case "available":
         return (
           <>
-            <span className="status-text">
-              {item.updatedAt !== item.createdAt
-                ? `Updated on: ${item.updatedAt}`
-                : `Listed on: ${item.createdAt}`}
-            </span>
+            <span className="status-text">Listed on: {item.createdAt}</span>
             <div className="button-group">
               <button className="edit-button" onClick={() => onEdit(item.id)}>
                 Edit Listing

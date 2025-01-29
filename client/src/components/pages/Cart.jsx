@@ -195,12 +195,14 @@ const Cart = () => {
     }
   };
 
+  const totalItems = cartData.items ? cartData.items.length : 0;
+
   if (loading) return <div>Loading cart data...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="cart-container">
-      <h1 className="cart-title">My Cart</h1>
+      <h1 className="cart-title">My Cart ({totalItems} total)</h1>
 
       <div className="tabs-container">
         {tabs.map((tab) => (

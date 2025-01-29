@@ -2,7 +2,15 @@ import React from "react";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 
-const NewItemModal = ({ show, onHide, newItem, setNewItem, handleImageUpload, onSubmit }) => {
+const NewItemModal = ({
+  show,
+  onHide,
+  newItem,
+  setNewItem,
+  handleImageUpload,
+  onSubmit,
+  userAddress,
+}) => {
   return (
     <Modal show={show} onHide={onHide} centered className="product-modal">
       <Modal.Header closeButton className="modal-header">
@@ -63,6 +71,18 @@ const NewItemModal = ({ show, onHide, newItem, setNewItem, handleImageUpload, on
               <option value="Delivery">Delivery</option>
             </Form.Select>
           </Form.Group>
+          {/* <Form.Group className="mb-3">
+            <Form.Label>Location</Form.Label>
+            <Form.Control
+              type="text"
+              value={
+                userAddress
+                  ? `${userAddress.street}, ${userAddress.city}, ${userAddress.zip}`
+                  : "Loading address..."
+              }
+              disabled
+            />
+          </Form.Group> */}
         </div>
       </Modal.Body>
       <Modal.Footer className="modal-footer">

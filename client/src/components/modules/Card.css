@@ -146,3 +146,24 @@
   background-color: var(--primary);
   color: var(--white);
 }
+
+.maps-link {
+  color: #007bff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.maps-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.maps-link i {
+  font-size: 14px;
+}
+
+.modal-location {
+  margin-top: 8px;
+}

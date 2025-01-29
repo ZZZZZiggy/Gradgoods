@@ -43,7 +43,7 @@ router.post("/initsocket", (req, res) => {
 // |------------------------------|
 // | write your API methods below!|
 // |------------------------------|
-
+const PERSONID = 1; // Temporary user ID for testing
 // datafiles
 const product1 = {
   _id: 1,
@@ -55,6 +55,11 @@ const product1 = {
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/IMG_E103515C1907-1.jpeg",
+  location: {
+    type: "Point",
+    coordinates: [42.3601, -71.0942], // Boston coordinates
+  },
+  distance: 0,
   status: {
     isAccepted: false,
     acceptedBy: null,
@@ -63,7 +68,6 @@ const product1 = {
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  distance: 1,
 };
 const product2 = {
   _id: 2,
@@ -75,6 +79,11 @@ const product2 = {
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3736, -71.1097], // Cambridge coordinates
+  },
+  distance: 0,
   status: {
     isAccepted: false,
     acceptedBy: null,
@@ -83,7 +92,6 @@ const product2 = {
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  distance: 1,
 };
 const product3 = {
   _id: 3,
@@ -95,6 +103,11 @@ const product3 = {
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3654, -71.1033], // MIT coordinates
+  },
+  distance: 0,
   status: {
     isAccepted: false,
     acceptedBy: null,
@@ -103,7 +116,6 @@ const product3 = {
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  distance: 1,
 };
 const product4 = {
   _id: 4,
@@ -115,6 +127,11 @@ const product4 = {
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.377, -71.1167], // Harvard coordinates
+  },
+  distance: 0,
   status: {
     isAccepted: false,
     acceptedBy: null,
@@ -123,7 +140,6 @@ const product4 = {
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  distance: 1,
 };
 const product5 = {
   _id: 5,
@@ -135,6 +151,11 @@ const product5 = {
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3505, -71.1054], // Brookline coordinates
+  },
+  distance: 0,
   status: {
     isAccepted: false,
     acceptedBy: null,
@@ -143,7 +164,6 @@ const product5 = {
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  distance: 1,
 };
 const product6 = {
   _id: 6,
@@ -155,6 +175,11 @@ const product6 = {
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/1.jpg",
+  location: {
+    type: "Point",
+    coordinates: [42.3875, -71.0995], // Somerville coordinates
+  },
+  distance: 0,
   status: {
     isAccepted: false,
     acceptedBy: null,
@@ -163,7 +188,6 @@ const product6 = {
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  distance: 1,
 };
 const products = [product1, product2, product3, product4, product5, product6];
 console.log(products);
@@ -214,23 +238,85 @@ const people = [
   },
 ];
 
+// Add helper function for distance calculation
+const calculateDistance = (coords1, coords2) => {
+  if (!coords1 || !coords2) return 0;
+
+  // 注意：坐标顺序应该是 [latitude, longitude]
+  const [lon1, lat1] = coords1; // 修改这里
+  const [lon2, lat2] = coords2; // 修改这里
+
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return Math.round(distance * 10) / 10;
+};
+router.get("/allproducts", (req, res) => {
+  try {
+    // Get user location from test user
+    const user = people.find((p) => p._id === PERSONID);
+    const userLocation = user?.address?.location?.coordinates;
+    // Calculate distances for all products
+    const productsWithDistance = products.map((product) => ({
+      ...product,
+      distance: calculateDistance(userLocation, product.location?.coordinates) || 0,
+    }));
+
+    res.send(productsWithDistance);
+  } catch (err) {
+    console.error("Detailed error in /api/products:", err);
+    res.status(500).send({ error: "Error fetching products" });
+  }
+});
 router.get("/products", (req, res) => {
   try {
-    res.send(products);
+    // Get user location from test user
+    const user = people.find((p) => p._id === PERSONID);
+    const userLocation = user?.address?.location?.coordinates;
+
+    // Filter products to only show those owned by PERSONID
+    const userProducts = products.filter((product) => product.ownerId === PERSONID);
+
+    // Calculate distances for filtered products
+    const productsWithDistance = userProducts.map((product) => {
+      const distance = calculateDistance(userLocation, product.location?.coordinates);
+      return {
+        ...product,
+        distance: distance || 0,
+      };
+    });
+
+    res.send(productsWithDistance);
   } catch (err) {
     console.error("Detailed error in /api/products:", err);
     res.status(500).send({ error: "Error fetching products" });
   }
 });
 
+// Modify the product creation route
 router.post("/products", (req, res) => {
   try {
     const currentDate = new Date().toISOString().split("T")[0];
     const _id = products.length + 1;
 
+    // Get buyer's location
+    const buyer = people.find((p) => p._id === PERSONID);
+    const buyerLocation = buyer?.address?.location?.coordinates;
+
     const newProduct = {
       _id,
-      ownerId: 1,
+      ownerId: PERSONID,
       owner: "seller1",
       name: req.body.name,
       price: req.body.price,
@@ -238,6 +324,8 @@ router.post("/products", (req, res) => {
       dateby: currentDate,
       description: req.body.description,
       image: req.body.image,
+      location: req.body.location,
+      distance: calculateDistance(buyerLocation, req.body.location?.coordinates),
       status: {
         isAccepted: false,
         acceptedBy: null,
@@ -246,12 +334,9 @@ router.post("/products", (req, res) => {
       },
       createdAt: currentDate,
       updatedAt: currentDate,
-      diatance: 1,
     };
 
     products.push(newProduct);
-
-    // make sure to send back the new product
     res.send(newProduct);
   } catch (err) {
     console.log(`Error creating product: ${err}`);
@@ -456,8 +541,6 @@ router.get("/address", (req, res) => {
     res.status(500).send({ error: "Error fetching address" });
   }
 });
-
-const PERSONID = 1; // Temporary user ID for testing
 
 router.get("/cart", (req, res) => {
   try {

@@ -6,6 +6,18 @@ import "./Card.css";
 const ProductCard = ({ product }) => {
   const [showModal, setShowModal] = useState(false);
 
+  // Add helper function to convert km to miles
+  const kmToMiles = (km) => {
+    return (km * 0.621371).toFixed(1);
+  };
+
+  // Add function to generate Google Maps link
+  const getGoogleMapsLink = (location) => {
+    if (!location?.coordinates) return null;
+    const [lat, lng] = location.coordinates;
+    return `https://www.google.com/maps?q=${lat},${lng}`;
+  };
+
   const handleOpen = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
   const handleAddToCart = async () => {
@@ -93,9 +105,26 @@ const ProductCard = ({ product }) => {
             <p className="modal-price">
               <strong>Price:</strong> ${product.price}
             </p>
-            <p className="modal-owner">
+            <p className="modal-location">
               <strong>Owner:</strong> {product.owner}
             </p>
+            <p className="modal-location">
+              <strong>Distance:</strong>{" "}
+              {product.distance ? `${kmToMiles(product.distance)} miles` : "Distance not available"}
+            </p>
+            {product.location && (
+              <p className="modal-location">
+                <strong>Location:</strong>{" "}
+                <a
+                  href={getGoogleMapsLink(product.location)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="maps-link"
+                >
+                  View on Google Maps <i className="fas fa-map-marker-alt"></i>
+                </a>
+              </p>
+            )}
           </div>
         </Modal.Body>
         <Modal.Footer className="modal-footer">

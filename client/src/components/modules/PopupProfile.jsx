@@ -149,7 +149,7 @@ const PopupProfile = ({ isHovered }) => {
       <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
         {/* avatar */}
         <div className="popup-avatar">
-          <Link to="/profile">
+          <Link to="/cart">
             <img src="/1.jpg" alt="Avatar" />
             {/* will be replaced with user's avatar */}
           </Link>
@@ -184,7 +184,7 @@ const PopupProfile = ({ isHovered }) => {
           </div>
           <div className="popup-bottom-item">
             <Link to="#" onClick={handleVerificationClick}>
-              Verification
+              Verification (No time to finish)
             </Link>
           </div>
         </div>
