@@ -59,6 +59,22 @@ const product1 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        buyerId: 2, // References Person._id
+        offerStatus: false,
+      },
+      {
+        price: 26,
+        message: "I'm pooeewer, but I want to buy this product",
+        createdAt: "2024-01-21",
+        buyerId: 3, // References Person._id
+        offerStatus: false,
+      },
+    ],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
@@ -78,6 +94,22 @@ const product2 = {
     isAccepted: true,
     acceptedBy: null,
     acceptedAt: null,
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        buyerId: 2, // References Person._id
+        Accepted: false,
+      },
+      {
+        price: 26,
+        message: "I'm pooeewer, but I want to buy this product",
+        createdAt: "2024-01-21",
+        buyerId: 3, // References Person._id
+        Accepted: false,
+      },
+    ],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
@@ -97,6 +129,22 @@ const product3 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        buyerId: 2, // References Person._id
+        Accepted: false,
+      },
+      {
+        price: 26,
+        message: "I'm pooeewer, but I want to buy this product",
+        createdAt: "2024-01-21",
+        buyerId: 3, // References Person._id
+        Accepted: false,
+      },
+    ],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
@@ -116,6 +164,22 @@ const product4 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        buyerId: 2, // References Person._id
+        Accepted: false,
+      },
+      {
+        price: 26,
+        message: "I'm pooeewer, but I want to buy this product",
+        createdAt: "2024-01-21",
+        buyerId: 3, // References Person._id
+        Accepted: false,
+      },
+    ],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
@@ -135,6 +199,22 @@ const product5 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        buyerId: 2, // References Person._id
+        Accepted: false,
+      },
+      {
+        price: 26,
+        message: "I'm pooeewer, but I want to buy this product",
+        createdAt: "2024-01-21",
+        buyerId: 3, // References Person._id
+        Accepted: false,
+      },
+    ],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
@@ -154,6 +234,22 @@ const product6 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        buyerId: 2, // References Person._id
+        Accepted: false,
+      },
+      {
+        price: 26,
+        message: "I'm pooeewer, but I want to buy this product",
+        createdAt: "2024-01-21",
+        buyerId: 3, // References Person._id
+        Accepted: false,
+      },
+    ],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
@@ -200,48 +296,6 @@ const people = [
   },
 ];
 
-const neigotiation = [
-  {
-    _id: 1,
-    productId: 5, // References Product._id
-    buyerId: 1, // References Person._id
-    sellerId: 2, // References Person._id
-    status: {
-      state: "rejected", // "pending" | "accepted" | "rejected" | "completed"
-      updatedAt: "2024-01-20",
-    },
-    offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        createdBy: 1, // References Person._id
-      },
-    ],
-    createdAt: "2024-01-20",
-    updatedAt: "2024-01-20",
-  },
-  {
-    _id: 2,
-    productId: 1, // References Product._id
-    buyerId: 2, // References Person._id
-    sellerId: 1, // References Person._id
-    status: {
-      state: "rejected", // "pending" | "accepted" | "rejected" | "completed"
-      updatedAt: "2024-01-20",
-    },
-    offers: [
-      {
-        price: 25,
-        message: "I'm poorlllll, but I want to buy this product",
-        createdAt: "2024-01-20",
-        createdBy: 2, // References Person._id
-      },
-    ],
-    createdAt: "2024-01-21",
-    updatedAt: "2024-01-21",
-  },
-];
 router.get("/products", (req, res) => {
   try {
     res.send(products);

@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import Modal from "react-bootstrap/Modal";
-import Form from "react-bootstrap/Form";
-import "./Cart.css";
 import { post } from "../../utilities";
+import RequestModal from "../modules/RequestModal";
+import NewItemModal from "../modules/NewItemModal";
+import EditItemModal from "../modules/EditItemModal";
+import ItemCard from "../modules/ItemCard";
+import "./Cart.css";
 
 const Sell = () => {
   const [activeTab, setActiveTab] = useState("available");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [requestDetails, setRequestDetails] = useState({
-    price: "",
-    message: "",
-  });
+  const [requestDetails, setRequestDetails] = useState({ price: "", message: "" });
   const [sentRequests, setSentRequests] = useState(new Set());
+  const [showNewItemModal, setShowNewItemModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const tabs = ["available", "negotiating", "deal"];
 
   const [requests, setRequests] = useState([
@@ -52,7 +54,6 @@ const Sell = () => {
     },
   ]);
 
-  const [showNewItemModal, setShowNewItemModal] = useState(false);
   const [newItem, setNewItem] = useState({
     image: null,
     imagePreview: null,
@@ -61,9 +62,6 @@ const Sell = () => {
     description: "",
     method: "Pickup", // default method
   });
-
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editItem, setEditItem] = useState(null);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -223,51 +221,6 @@ const Sell = () => {
     deal: requests.filter((item) => item.acceptStatus === true),
   };
 
-  const renderCardStatus = (item, tab) => {
-    switch (tab) {
-      case "available":
-        return (
-          <>
-            <span className="status-text">Listed on: {item.listDate}</span>
-            <div className="button-group">
-              <button className="edit-button" onClick={() => handleEdit(item.id)}>
-                Edit Listing
-              </button>
-              <button className="delete-button" onClick={() => handleDelete(item.id)}>
-                Delete Listing
-              </button>
-            </div>
-          </>
-        );
-
-      case "negotiating":
-        return (
-          <div className="button-group">
-            <button className="edit-button" onClick={() => handleAccept(item.id)}>
-              Accept
-            </button>
-            <button className="delete-button" onClick={() => handleDeny(item.id)}>
-              Deny
-            </button>
-          </div>
-        );
-
-      case "deal":
-        return (
-          <>
-            <span className="status-text">Deal Confirmed</span>
-            <span className="sent-date">Confirmed on: {item.replyDate}</span>
-            <span className="ready-status">
-              Ready for {item.method === "Pickup" ? "Pickup" : "Delivery"}
-            </span>
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="cart-container">
       <div className="header-container">
@@ -291,223 +244,43 @@ const Sell = () => {
 
       <div className="requests-container">
         {filteredRequests[activeTab]?.map((item) => (
-          <div key={item.id} className="request-card">
-            <div className="card-image">
-              <img src={item.image} alt={item.name} />
-            </div>
-
-            <div className="card-details">
-              <h3 className="product-name">{item.name}</h3>
-              <p className="product-price">${item.price}</p>
-              <p className="product-description">{item.description}</p>
-            </div>
-
-            <div className="card-status">{renderCardStatus(item, activeTab)}</div>
-          </div>
+          <ItemCard
+            key={item.id}
+            item={item}
+            tab={activeTab}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAccept={handleAccept}
+            onDeny={handleDeny}
+          />
         ))}
       </div>
 
-      <Modal
+      <RequestModal
         show={showRequestModal}
         onHide={handleCloseRequestModal}
-        centered
-        className="request-modal"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Send Request</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Your Offer Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                value={requestDetails.price}
-                onChange={(e) => setRequestDetails({ ...requestDetails, price: e.target.value })}
-                min="0"
-                step="0.01"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={requestDetails.message}
-                onChange={(e) => setRequestDetails({ ...requestDetails, message: e.target.value })}
-                placeholder="Enter your message to the seller..."
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="modal-cancel-button" onClick={handleCloseRequestModal}>
-            Cancel
-          </button>
-          <button className="modal-submit-button" onClick={handleSendRequest}>
-            Send Request
-          </button>
-        </Modal.Footer>
-      </Modal>
+        requestDetails={requestDetails}
+        setRequestDetails={setRequestDetails}
+        onSubmit={handleSendRequest}
+      />
 
-      <Modal
+      <NewItemModal
         show={showNewItemModal}
         onHide={() => setShowNewItemModal(false)}
-        centered
-        className="product-modal"
-      >
-        <Modal.Header closeButton className="modal-header">
-          <Modal.Title className="modal-title">Add New Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="modal-body">
-          <div className="image-upload-container">
-            {newItem.imagePreview ? (
-              <img src={newItem.imagePreview} alt="Preview" className="modal-image" />
-            ) : (
-              <label className="image-upload-label">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                />
-                <i className="fas fa-cloud-upload-alt"></i>
-                <span>Click to upload image</span>
-              </label>
-            )}
-          </div>
-          <div className="modal-details">
-            <Form.Group className="mb-3">
-              <Form.Label>Item Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={newItem.name}
-                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                value={newItem.price}
-                onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                min="0"
-                step="0.01"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Method</Form.Label>
-              <Form.Select
-                value={newItem.method}
-                onChange={(e) => setNewItem({ ...newItem, method: e.target.value })}
-              >
-                <option value="Pickup">Pickup</option>
-                <option value="Delivery">Delivery</option>
-              </Form.Select>
-            </Form.Group>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="modal-footer">
-          <button
-            className="modal-button primary"
-            onClick={handleNewItemSubmit}
-            disabled={!newItem.image || !newItem.name || !newItem.price || !newItem.description}
-          >
-            Finish
-          </button>
-        </Modal.Footer>
-      </Modal>
+        newItem={newItem}
+        setNewItem={setNewItem}
+        handleImageUpload={handleImageUpload}
+        onSubmit={handleNewItemSubmit}
+      />
 
-      <Modal
+      <EditItemModal
         show={showEditModal}
         onHide={() => setShowEditModal(false)}
-        centered
-        className="product-modal"
-      >
-        <Modal.Header closeButton className="modal-header">
-          <Modal.Title className="modal-title">Edit Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="modal-body">
-          <div className="image-upload-container" style={{ cursor: "pointer" }}>
-            <label className="image-upload-label" style={{ width: "100%", height: "100%" }}>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleEditImageUpload}
-                style={{ display: "none" }}
-              />
-              {editItem?.imagePreview ? (
-                <img src={editItem.imagePreview} alt="Preview" className="modal-image" />
-              ) : (
-                <>
-                  <i className="fas fa-cloud-upload-alt"></i>
-                  <span>Click to upload image</span>
-                </>
-              )}
-            </label>
-          </div>
-          <div className="modal-details">
-            <Form.Group className="mb-3">
-              <Form.Label>Item Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={editItem?.name || ""}
-                onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                value={editItem?.price || ""}
-                onChange={(e) => setEditItem({ ...editItem, price: e.target.value })}
-                min="0"
-                step="0.01"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={editItem?.description || ""}
-                onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Method</Form.Label>
-              <Form.Select
-                value={editItem?.method || "Pickup"}
-                onChange={(e) => setEditItem({ ...editItem, method: e.target.value })}
-              >
-                <option value="Pickup">Pickup</option>
-                <option value="Delivery">Delivery</option>
-              </Form.Select>
-            </Form.Group>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="modal-footer">
-          <button className="modal-cancel-button" onClick={() => setShowEditModal(false)}>
-            Cancel
-          </button>
-          <button
-            className="modal-submit-button"
-            onClick={handleEditSubmit}
-            disabled={!editItem?.name || !editItem?.price || !editItem?.description}
-          >
-            Save Changes
-          </button>
-        </Modal.Footer>
-      </Modal>
+        editItem={editItem}
+        setEditItem={setEditItem}
+        handleEditImageUpload={handleEditImageUpload}
+        onSubmit={handleEditSubmit}
+      />
     </div>
   );
 };
