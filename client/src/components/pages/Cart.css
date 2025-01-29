@@ -202,7 +202,7 @@
 }
 
 .resend-button:hover {
-  background-color: var(--darkgrey);
+  background-color: var (--darkgrey);
 }
 
 .ready-status {
@@ -407,4 +407,57 @@
 .deal-date {
   color: var(--medgrey);
   font-size: 0.9em;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  padding: 1rem;
+  margin: 1rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.no-items-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.offers-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m);
+}
+
+.offer-buyer {
+  color: var(--darkgrey);
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.offer-message {
+  font-style: italic;
+  color: var(--darkgrey);
+  margin: var(--xs) 0;
+}
+
+.offer-date {
+  font-size: 0.8em;
+  color: var(--medgrey);
+  margin: 0;
+}
+
+.original-price {
+  font-size: 0.8em;
+  color: var(--medgrey);
+  margin-left: var(--s);
 }

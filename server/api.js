@@ -50,7 +50,7 @@ const product1 = {
   ownerId: 1,
   owner: "seller1",
   name: "Product 1",
-  prize: 100,
+  price: 100,
   method: "Delivery",
   dateby: "2024-01-20",
   description: "pick up by April 32",
@@ -60,20 +60,20 @@ const product1 = {
     acceptedBy: null,
     acceptedAt: null,
     offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        buyerId: 2, // References Person._id
-        offerStatus: false,
-      },
-      {
-        price: 26,
-        message: "I'm pooeewer, but I want to buy this product",
-        createdAt: "2024-01-21",
-        buyerId: 3, // References Person._id
-        offerStatus: false,
-      },
+      // {
+      //   price: 25,
+      //   message: "I'm poor, but I want to buy this product",
+      //   createdAt: "2024-01-20",
+      //   buyerId: 2, // References Person._id
+      //   offerStatus: false,
+      // },
+      // {
+      //   price: 26,
+      //   message: "I'm pooeewer, but I want to buy this product",
+      //   createdAt: "2024-01-21",
+      //   buyerId: 3, // References Person._id
+      //   offerStatus: false,
+      // },
     ],
   },
   createdAt: "2024-01-20",
@@ -85,13 +85,13 @@ const product2 = {
   ownerId: 2,
   owner: "seller2",
   name: "Product 2",
-  prize: 200,
+  price: 200,
   method: "Delivery",
   dateby: "2024-01-20",
   description: "pick up by April 32",
   image: "/1.jpg",
   status: {
-    isAccepted: true,
+    isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
     offers: [
@@ -120,7 +120,7 @@ const product3 = {
   ownerId: 3,
   owner: "seller3",
   name: "Product 3",
-  prize: 300,
+  price: 300,
   method: "Delivery",
   dateby: "2024-01-20",
   description: "pick up by April 32",
@@ -155,7 +155,7 @@ const product4 = {
   ownerId: 1,
   owner: "seller1",
   name: "Product 1",
-  prize: 100,
+  price: 100,
   method: "Delivery",
   dateby: "2024-01-20",
   description: "pick up by April 32",
@@ -190,7 +190,7 @@ const product5 = {
   ownerId: 2,
   owner: "seller2",
   name: "Product 2",
-  prize: 200,
+  price: 200,
   method: "Delivery",
   dateby: "2024-01-20",
   description: "pick up by April 32",
@@ -225,7 +225,7 @@ const product6 = {
   ownerId: 3,
   owner: "seller3",
   name: "Product 3",
-  prize: 300,
+  price: 300,
   method: "Delivery",
   dateby: "2024-01-20",
   description: "pick up by April 32",
@@ -235,20 +235,20 @@ const product6 = {
     acceptedBy: null,
     acceptedAt: null,
     offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        buyerId: 2, // References Person._id
-        Accepted: false,
-      },
-      {
-        price: 26,
-        message: "I'm pooeewer, but I want to buy this product",
-        createdAt: "2024-01-21",
-        buyerId: 3, // References Person._id
-        Accepted: false,
-      },
+      // {
+      //   price: 25,
+      //   message: "I'm poor, but I want to buy this product",
+      //   createdAt: "2024-01-20",
+      //   buyerId: 2, // References Person._id
+      //   Accepted: false,
+      // },
+      // {
+      //   price: 26,
+      //   message: "I'm pooeewer, but I want to buy this product",
+      //   createdAt: "2024-01-21",
+      //   buyerId: 3, // References Person._id
+      //   Accepted: false,
+      // },
     ],
   },
   createdAt: "2024-01-20",
@@ -256,7 +256,7 @@ const product6 = {
   diatance: 1,
 };
 const products = [product1, product2, product3, product4, product5, product6];
-
+console.log(products);
 const people = [
   {
     _id: 1,
@@ -275,6 +275,18 @@ const people = [
     },
     createdAt: "2024-01-20",
     updatedAt: "2024-01-20",
+    cart: {
+      items: [
+        {
+          productId: 1, // 引用商品ID
+          addedAt: "2024-01-20",
+          quantity: 1,
+          savedPrice: 100, // 保存加入购物车时的价格
+          notes: "可选备注",
+        },
+      ],
+      lastUpdated: "2024-01-20",
+    },
   },
   {
     _id: 2,
@@ -291,6 +303,18 @@ const people = [
         coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
       },
     },
+    cart: {
+      items: [
+        {
+          productId: 1, // 引用商品ID
+          addedAt: "2024-01-20",
+          quantity: 1,
+          savedPrice: 100, // 保存加入购物车时的价格
+          notes: "可选备注",
+        },
+      ],
+      lastUpdated: "2024-01-20",
+    },
     createdAt: "2024-01-20",
     updatedAt: "2024-01-20",
   },
@@ -298,9 +322,10 @@ const people = [
 
 router.get("/products", (req, res) => {
   try {
+    // 详细的调试日志
     res.send(products);
   } catch (err) {
-    console.log(`Error in /api/products: ${err}`);
+    console.error("Detailed error in /api/products:", err);
     res.status(500).send({ error: "Error fetching products" });
   }
 });
@@ -308,12 +333,14 @@ router.get("/products", (req, res) => {
 router.post("/products", (req, res) => {
   try {
     const currentDate = new Date().toISOString().split("T")[0];
+    const _id = products.length + 1;
+
     const newProduct = {
-      _id: products.length + 1,
+      _id,
       ownerId: 1,
       owner: "seller1",
       name: req.body.name,
-      prize: req.body.prize,
+      price: req.body.price,
       method: req.body.method,
       dateby: currentDate,
       description: req.body.description,
@@ -322,6 +349,7 @@ router.post("/products", (req, res) => {
         isAccepted: false,
         acceptedBy: null,
         acceptedAt: null,
+        offers: [],
       },
       createdAt: currentDate,
       updatedAt: currentDate,
@@ -329,11 +357,115 @@ router.post("/products", (req, res) => {
     };
 
     products.push(newProduct);
-    console.log("New product added:", newProduct);
+
+    // 确保返回的对象包含所有必要字段
     res.send(newProduct);
   } catch (err) {
     console.log(`Error creating product: ${err}`);
     res.status(500).send({ error: "Error creating product" });
+  }
+});
+
+// Add two new endpoints
+router.post("/products/edit", (req, res) => {
+  try {
+    const { id, updates } = req.body;
+    const productIndex = products.findIndex((p) => p._id === id);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    // Update the product
+    products[productIndex] = {
+      ...products[productIndex],
+      ...updates,
+      updatedAt: new Date().toISOString().split("T")[0],
+    };
+
+    res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error editing product:", err);
+    res.status(500).send({ error: "Error editing product" });
+  }
+});
+
+router.post("/products/delete", (req, res) => {
+  try {
+    const { id } = req.body;
+    const productIndex = products.findIndex((p) => p._id === id);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    // Remove the product
+    const deletedProduct = products.splice(productIndex, 1)[0];
+    res.send(deletedProduct);
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.status(500).send({ error: "Error deleting product" });
+  }
+});
+
+router.post("/products/accept-offer", (req, res) => {
+  try {
+    const { productId, offerIndex } = req.body;
+    const productIndex = products.findIndex((p) => p._id === productId);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    const product = products[productIndex];
+    const acceptedOffer = product.status.offers[offerIndex];
+
+    // Update product status
+    products[productIndex] = {
+      ...product,
+      status: {
+        ...product.status,
+        isAccepted: true,
+        acceptedBy: acceptedOffer.buyerId,
+        acceptedAt: new Date().toISOString(),
+        acceptedOffer: acceptedOffer,
+        offers: [], // Clear other offers
+      },
+    };
+
+    res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error accepting offer:", err);
+    res.status(500).send({ error: "Error accepting offer" });
+  }
+});
+
+router.post("/products/deny-offer", (req, res) => {
+  try {
+    const { productId, offerIndex } = req.body;
+    const productIndex = products.findIndex((p) => p._id === productId);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    const product = products[productIndex];
+    const updatedOffers = [...product.status.offers];
+    updatedOffers.splice(offerIndex, 1);
+
+    // Update product
+    products[productIndex] = {
+      ...product,
+      status: {
+        ...product.status,
+        offers: updatedOffers,
+      },
+    };
+
+    res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error denying offer:", err);
+    res.status(500).send({ error: "Error denying offer" });
   }
 });
 

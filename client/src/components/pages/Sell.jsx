@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { post } from "../../utilities";
+import React, { useEffect, useState } from "react";
+import { post, get } from "../../utilities";
 import RequestModal from "../modules/RequestModal";
 import NewItemModal from "../modules/NewItemModal";
 import EditItemModal from "../modules/EditItemModal";
 import ItemCard from "../modules/ItemCard";
 import "./Cart.css";
+
+const PERSONID = 1;
 
 const Sell = () => {
   const [activeTab, setActiveTab] = useState("available");
@@ -17,42 +19,47 @@ const Sell = () => {
   const [editItem, setEditItem] = useState(null);
   const tabs = ["available", "negotiating", "deal"];
 
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      image: "/1.jpg",
-      name: "Sample Product 1",
-      price: 99.99,
-      description: "Product description here",
-      listDate: new Date().toLocaleDateString(),
-      status: "available", // new status for available items
-      method: "Pickup",
-    },
-    {
-      id: 2,
-      image: "/1.jpg",
-      name: "Sample Product 2",
-      price: 149.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      replyDate: "2024-01-21",
-      acceptStatus: false, // negotiating
-      method: "Delivery",
-      status: "available",
-    },
-    {
-      id: 3,
-      image: "/1.jpg",
-      name: "Sample Product 3",
-      price: 199.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      replyDate: "2024-01-21",
-      acceptStatus: true, // deal
-      method: "Pickup",
-      status: "available",
-    },
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [operationError, setOperationError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const productObjs = await get("/api/products");
+
+        if (!productObjs || productObjs.length === 0) {
+          setRequests([]);
+          return;
+        }
+
+        // filter user-specific products
+        const userProducts = productObjs.filter((product) => product.ownerId === PERSONID);
+
+        // construct categorizedProducts
+        const categorizedProducts = userProducts.map((product) => ({
+          ...product,
+          id: product._id,
+          listDate: product.createdAt,
+          price: product.price || 0,
+        }));
+
+        console.log("User's products loaded:", categorizedProducts.length);
+        setRequests(categorizedProducts);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        setError("Failed to load products. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const [newItem, setNewItem] = useState({
     image: null,
@@ -76,33 +83,30 @@ const Sell = () => {
 
   // construct new product
   const handleNewItemSubmit = async () => {
-    const currentDate = new Date().toISOString().split("T")[0];
-    const newItemWithDefaults = {
-      _id: Date.now(), // 临时ID
-      ownerId: 1, // TODO: 应该从用户信息中获取
-      owner: "seller1", // TODO: 应该从用户信息中获取
-      name: newItem.name,
-      prize: parseFloat(newItem.price),
-      method: newItem.method,
-      dateby: currentDate,
-      description: newItem.description,
-      image: newItem.imagePreview,
-      status: {
-        isAccepted: false,
-        acceptedBy: null,
-        acceptedAt: null,
-      },
-      createdAt: currentDate,
-      updatedAt: currentDate,
-      diatance: 1, // TODO: 应该根据用户地址计算
-    };
-
     try {
-      // 发送到服务器
+      setIsSubmitting(true);
+      setOperationError(null);
+
+      const currentDate = new Date().toISOString().split("T")[0];
+      const newItemWithDefaults = {
+        name: newItem.name,
+        price: parseFloat(newItem.price),
+        method: newItem.method,
+        description: newItem.description,
+        image: newItem.imagePreview,
+      };
+
       const savedProduct = await post("/api/products", newItemWithDefaults);
-      setRequests((prev) => [...prev, savedProduct]);
+
+      // add correct id
+      const productWithCorrectId = {
+        ...savedProduct,
+        id: savedProduct._id, // match the backend
+      };
+
+      setRequests((prev) => [...prev, productWithCorrectId]);
       setShowNewItemModal(false);
-      // 重置表单
+
       setNewItem({
         image: null,
         imagePreview: null,
@@ -112,7 +116,10 @@ const Sell = () => {
         method: "Pickup",
       });
     } catch (err) {
-      console.error("Failed to create product:", err);
+      setOperationError("Failed to create product. Please try again.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -136,34 +143,46 @@ const Sell = () => {
     handleCloseRequestModal();
   };
 
-  const handleAccept = (itemId) => {
-    setRequests((prev) =>
-      prev.map((item) => {
-        if (item.id === itemId) {
-          return {
-            ...item,
-            acceptStatus: true,
-            replyDate: new Date().toLocaleDateString(),
-          };
-        }
-        return item;
-      })
-    );
+  const handleAccept = async (itemId, offerIndex) => {
+    try {
+      setIsSubmitting(true);
+      setOperationError(null);
+
+      // Send accept request to server
+      const response = await post("/api/products/accept-offer", {
+        productId: itemId,
+        offerIndex: offerIndex,
+      });
+
+      // Update local state
+      setRequests((prev) => prev.map((item) => (item.id === itemId ? response : item)));
+    } catch (err) {
+      setOperationError("Failed to accept offer. Please try again.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeny = (itemId) => {
-    setRequests((prev) =>
-      prev.map((item) => {
-        if (item.id === itemId) {
-          return {
-            ...item,
-            acceptStatus: false,
-            replyDate: new Date().toLocaleDateString(),
-          };
-        }
-        return item;
-      })
-    );
+  const handleDeny = async (itemId, offerIndex) => {
+    try {
+      setIsSubmitting(true);
+      setOperationError(null);
+
+      // Send deny request to server
+      const response = await post("/api/products/deny-offer", {
+        productId: itemId,
+        offerIndex: offerIndex,
+      });
+
+      // Update local state
+      setRequests((prev) => prev.map((item) => (item.id === itemId ? response : item)));
+    } catch (err) {
+      setOperationError("Failed to deny offer. Please try again.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEdit = (itemId) => {
@@ -175,112 +194,155 @@ const Sell = () => {
     setShowEditModal(true);
   };
 
-  const handleEditSubmit = () => {
-    setRequests((prev) =>
-      prev.map((item) => {
-        if (item.id === editItem.id) {
-          return {
-            ...editItem,
-            image: editItem.imagePreview,
-          };
-        }
-        return item;
-      })
-    );
+  const handleEditSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setOperationError(null);
 
-    // 清理工作
-    if (editItem.imagePreview && editItem.imagePreview !== editItem.image) {
-      URL.revokeObjectURL(editItem.imagePreview);
+      // Prepare updates
+      const updates = {
+        ...editItem,
+        image: editItem.imagePreview,
+        updatedAt: new Date().toISOString().split("T")[0],
+      };
+
+      // Send to server
+      const response = await post("/api/products/edit", {
+        id: editItem.id,
+        updates: updates,
+      });
+
+      // Update local state
+      setRequests((prev) => prev.map((item) => (item.id === editItem.id ? response : item)));
+
+      // Cleanup
+      if (editItem.imagePreview && editItem.imagePreview !== editItem.image) {
+        URL.revokeObjectURL(editItem.imagePreview);
+      }
+      setShowEditModal(false);
+      setEditItem(null);
+    } catch (err) {
+      setOperationError("Failed to edit product. Please try again.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
-    setShowEditModal(false);
-    setEditItem(null);
   };
 
   const handleEditImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // 释放旧的预览URL
       if (editItem.imagePreview && editItem.imagePreview !== editItem.image) {
         URL.revokeObjectURL(editItem.imagePreview);
       }
       setEditItem({
         ...editItem,
-        image: file, // 保存文件对象
-        imagePreview: URL.createObjectURL(file), // 创建新的预览URL
+        image: file,
+        imagePreview: URL.createObjectURL(file),
       });
     }
   };
 
-  const handleDelete = (itemId) => {
-    setRequests((prev) => prev.filter((item) => item.id !== itemId));
+  const handleDelete = async (itemId) => {
+    try {
+      setIsSubmitting(true);
+      setOperationError(null);
+
+      // Send delete request to server
+      await post("/api/products/delete", { id: itemId });
+
+      // Update local state
+      setRequests((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (err) {
+      setOperationError("Failed to delete product. Please try again.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredRequests = {
-    available: requests.filter((item) => item.status === "available"),
-    negotiating: requests.filter((item) => item.acceptStatus === false),
-    deal: requests.filter((item) => item.acceptStatus === true),
+    available: requests.filter(
+      (item) => !item.status.isAccepted && (!item.status.offers || item.status.offers.length === 0)
+    ),
+    negotiating: requests.filter(
+      (item) => !item.status.isAccepted && item.status.offers && item.status.offers.length > 0
+    ),
+    deal: requests.filter((item) => item.status.isAccepted),
   };
 
   return (
     <div className="cart-container">
-      <div className="header-container">
-        <h1 className="cart-title">My Items</h1>
-        <button className="add-item-button" onClick={() => setShowNewItemModal(true)}>
-          <i className="fas fa-plus"></i>
-        </button>
-      </div>
+      {error && <div className="error-message">{error}</div>}
+      {operationError && <div className="error-message">{operationError}</div>}
+      {isLoading ? (
+        <div className="loading-spinner">Loading...</div>
+      ) : (
+        <>
+          <div className="header-container">
+            <h1 className="cart-title">My Items ({requests.length} total)</h1>
+            <button className="add-item-button" onClick={() => setShowNewItemModal(true)}>
+              <i className="fas fa-plus"></i>
+            </button>
+          </div>
 
-      <div className="tabs-container">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            className={`tab-button ${activeTab === tab ? "active" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
-      </div>
+          <div className="tabs-container">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                className={`tab-button ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)} ({filteredRequests[tab].length})
+              </button>
+            ))}
+          </div>
 
-      <div className="requests-container">
-        {filteredRequests[activeTab]?.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            tab={activeTab}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAccept={handleAccept}
-            onDeny={handleDeny}
+          <div className="requests-container">
+            {filteredRequests[activeTab]?.length === 0 ? (
+              <div className="no-items-message">No items in this category</div>
+            ) : (
+              filteredRequests[activeTab]?.map((item) => (
+                <ItemCard
+                  key={item._id}
+                  item={item}
+                  tab={activeTab}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onAccept={handleAccept}
+                  onDeny={handleDeny}
+                />
+              ))
+            )}
+          </div>
+
+          <RequestModal
+            show={showRequestModal}
+            onHide={handleCloseRequestModal}
+            requestDetails={requestDetails}
+            setRequestDetails={setRequestDetails}
+            onSubmit={handleSendRequest}
           />
-        ))}
-      </div>
 
-      <RequestModal
-        show={showRequestModal}
-        onHide={handleCloseRequestModal}
-        requestDetails={requestDetails}
-        setRequestDetails={setRequestDetails}
-        onSubmit={handleSendRequest}
-      />
+          <NewItemModal
+            show={showNewItemModal}
+            onHide={() => setShowNewItemModal(false)}
+            newItem={newItem}
+            setNewItem={setNewItem}
+            handleImageUpload={handleImageUpload}
+            onSubmit={handleNewItemSubmit}
+          />
 
-      <NewItemModal
-        show={showNewItemModal}
-        onHide={() => setShowNewItemModal(false)}
-        newItem={newItem}
-        setNewItem={setNewItem}
-        handleImageUpload={handleImageUpload}
-        onSubmit={handleNewItemSubmit}
-      />
-
-      <EditItemModal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        editItem={editItem}
-        setEditItem={setEditItem}
-        handleEditImageUpload={handleEditImageUpload}
-        onSubmit={handleEditSubmit}
-      />
+          <EditItemModal
+            show={showEditModal}
+            onHide={() => setShowEditModal(false)}
+            editItem={editItem}
+            setEditItem={setEditItem}
+            handleEditImageUpload={handleEditImageUpload}
+            onSubmit={handleEditSubmit}
+          />
+        </>
+      )}
     </div>
   );
 };

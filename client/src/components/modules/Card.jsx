@@ -29,7 +29,7 @@ const ProductCard = ({ product }) => {
             </Card.Text>
           </div>
           <div className="footer">
-            <Card.Title className="prize">${product.prize}</Card.Title>
+            <Card.Title className="prize">${product.price}</Card.Title>
             <Button className="button" variant="primary" onClick={handleOpen}>
               Interseted
             </Button>
@@ -48,7 +48,7 @@ const ProductCard = ({ product }) => {
               <strong>Description:</strong> {product.description}
             </p>
             <p className="modal-price">
-              <strong>Price:</strong> ${product.prize}
+              <strong>Price:</strong> ${product.price}
             </p>
             <p className="modal-owner">
               <strong>Owner:</strong> {product.owner}
