@@ -95,20 +95,20 @@ const product2 = {
     acceptedBy: null,
     acceptedAt: null,
     offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        buyerId: 2, // References Person._id
-        Accepted: false,
-      },
-      {
-        price: 26,
-        message: "I'm pooeewer, but I want to buy this product",
-        createdAt: "2024-01-21",
-        buyerId: 3, // References Person._id
-        Accepted: false,
-      },
+      // {
+      //   price: 25,
+      //   message: "I'm poor, but I want to buy this product",
+      //   createdAt: "2024-01-20",
+      //   buyerId: 2, // References Person._id
+      //   Accepted: false,
+      // },
+      // {
+      //   price: 26,
+      //   message: "I'm pooeewer, but I want to buy this product",
+      //   createdAt: "2024-01-21",
+      //   buyerId: 3, // References Person._id
+      //   Accepted: false,
+      // },
     ],
   },
   createdAt: "2024-01-20",
@@ -130,20 +130,20 @@ const product3 = {
     acceptedBy: null,
     acceptedAt: null,
     offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        buyerId: 2, // References Person._id
-        Accepted: false,
-      },
-      {
-        price: 26,
-        message: "I'm pooeewer, but I want to buy this product",
-        createdAt: "2024-01-21",
-        buyerId: 3, // References Person._id
-        Accepted: false,
-      },
+      // {
+      //   price: 25,
+      //   message: "I'm poor, but I want to buy this product",
+      //   createdAt: "2024-01-20",
+      //   buyerId: 2, // References Person._id
+      //   Accepted: false,
+      // },
+      // {
+      //   price: 26,
+      //   message: "I'm pooeewer, but I want to buy this product",
+      //   createdAt: "2024-01-21",
+      //   buyerId: 3, // References Person._id
+      //   Accepted: false,
+      // },
     ],
   },
   createdAt: "2024-01-20",
@@ -165,20 +165,20 @@ const product4 = {
     acceptedBy: null,
     acceptedAt: null,
     offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        buyerId: 2, // References Person._id
-        Accepted: false,
-      },
-      {
-        price: 26,
-        message: "I'm pooeewer, but I want to buy this product",
-        createdAt: "2024-01-21",
-        buyerId: 3, // References Person._id
-        Accepted: false,
-      },
+      // {
+      //   price: 25,
+      //   message: "I'm poor, but I want to buy this product",
+      //   createdAt: "2024-01-20",
+      //   buyerId: 2, // References Person._id
+      //   Accepted: false,
+      // },
+      // {
+      //   price: 26,
+      //   message: "I'm pooeewer, but I want to buy this product",
+      //   createdAt: "2024-01-21",
+      //   buyerId: 3, // References Person._id
+      //   Accepted: false,
+      // },
     ],
   },
   createdAt: "2024-01-20",
@@ -200,20 +200,20 @@ const product5 = {
     acceptedBy: null,
     acceptedAt: null,
     offers: [
-      {
-        price: 25,
-        message: "I'm poor, but I want to buy this product",
-        createdAt: "2024-01-20",
-        buyerId: 2, // References Person._id
-        Accepted: false,
-      },
-      {
-        price: 26,
-        message: "I'm pooeewer, but I want to buy this product",
-        createdAt: "2024-01-21",
-        buyerId: 3, // References Person._id
-        Accepted: false,
-      },
+      // {
+      //   price: 25,
+      //   message: "I'm poor, but I want to buy this product",
+      //   createdAt: "2024-01-20",
+      //   buyerId: 2, // References Person._id
+      //   Accepted: false,
+      // },
+      // {
+      //   price: 26,
+      //   message: "I'm pooeewer, but I want to buy this product",
+      //   createdAt: "2024-01-21",
+      //   buyerId: 3, // References Person._id
+      //   Accepted: false,
+      // },
     ],
   },
   createdAt: "2024-01-20",
@@ -276,24 +276,7 @@ const people = [
     createdAt: "2024-01-20",
     updatedAt: "2024-01-20",
     cart: {
-      items: [
-        {
-          productId: 1,
-          addedAt: "2024-01-20",
-          savedPrice: 100,
-          currentPrice: 100,
-          priceChanged: false,
-          status: "pending",
-        },
-        {
-          productId: 2,
-          addedAt: "2024-01-20",
-          savedPrice: 100,
-          currentPrice: 100,
-          priceChanged: false,
-          status: "pending",
-        },
-      ],
+      items: [],
       lastUpdated: "2024-01-20",
     },
   },
@@ -313,16 +296,7 @@ const people = [
       },
     },
     cart: {
-      items: [
-        {
-          productId: 1,
-          addedAt: "2024-01-20",
-          savedPrice: 100, // 保存加入购物车时的价格
-          currentPrice: 100, // 当前商品实际价格
-          priceChanged: false, // 标记价格是否发生变化
-          status: "deal",
-        },
-      ],
+      items: [],
       lastUpdated: "2024-01-20",
     },
     createdAt: "2024-01-20",
@@ -332,7 +306,6 @@ const people = [
 
 router.get("/products", (req, res) => {
   try {
-    // 详细的调试日志
     res.send(products);
   } catch (err) {
     console.error("Detailed error in /api/products:", err);
@@ -386,7 +359,6 @@ router.post("/products/edit", (req, res) => {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    // 如果价格发生变化，更新所有购物车中的该商品
     if (updates.price !== products[productIndex].price) {
       people.forEach((person) => {
         if (person.cart?.items) {
@@ -487,10 +459,42 @@ router.post("/products/deny-offer", (req, res) => {
       status: {
         ...product.status,
         offers: updatedOffers,
+        Accepted: false,
       },
     };
 
     res.send(products[productIndex]);
+  } catch (err) {
+    console.error("Error denying offer:", err);
+    res.status(500).send({ error: "Error denying offer" });
+  }
+});
+
+router.post("/products/deny-offer", (req, res) => {
+  try {
+    const { productId, offerIndex } = req.body;
+    const productIndex = products.findIndex((p) => p._id === productId);
+
+    if (productIndex === -1) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    const product = products[productIndex];
+    const offer = product.status.offers[offerIndex];
+
+    // 更新offer的状态为false
+    offer.Accepted = false;
+
+    // 更新购物车中的相应商品状态
+    const user = people.find((p) => p._id === offer.buyerId);
+    if (user && user.cart) {
+      const cartItem = user.cart.items.find((item) => item.productId === productId);
+      if (cartItem) {
+        cartItem.lastOfferAccepted = false; // 记录offer被拒绝
+      }
+    }
+
+    res.send(product);
   } catch (err) {
     console.error("Error denying offer:", err);
     res.status(500).send({ error: "Error denying offer" });
@@ -722,22 +726,22 @@ router.post("/cart/make-offer", (req, res) => {
       return res.status(404).send({ error: "User or product not found" });
     }
 
-    // Add offer to product
     const now = new Date().toISOString();
     const newOffer = {
       price,
       message,
       createdAt: now,
       buyerId: userId,
-      Accepted: false,
+      Accepted: null,
     };
 
     product.status.offers.push(newOffer);
 
-    // Update cart item status
+    // Update cart item status and add offer status tracking
     const cartItem = user.cart.items.find((item) => item.productId === productId);
     if (cartItem) {
       cartItem.status = "negotiating";
+      cartItem.lastOfferAccepted = null;
     }
 
     res.send({ product, cartItem });
@@ -752,5 +756,5 @@ router.all("*", (req, res) => {
   console.log(`API route not found: ${req.method} ${req.url}`);
   res.status(404).send({ msg: "API route not found" });
 });
-
+console.log(product4);
 module.exports = router;

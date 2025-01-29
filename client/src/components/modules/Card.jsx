@@ -41,8 +41,8 @@ const ProductCard = ({ product }) => {
         },
         body: JSON.stringify({
           productId: product._id,
-          price: product.price, // 使用原始价格，也可以添加议价功能
-          message: "I want to buy this product", // 可以添加输入框让用户输入消息
+          price: product.price,
+          message: "I want to buy this product",
         }),
       });
 

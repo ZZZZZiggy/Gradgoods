@@ -134,6 +134,13 @@ const Cart = () => {
     }
   };
 
+  // Add this helper function
+  const isOfferDenied = (item) => {
+    const userId = 1; // Replace with actual user ID from authentication
+    const offers = item.product?.status?.offers || [];
+    return !offers.some((offer) => offer.buyerId === userId);
+  };
+
   const renderCardStatus = (item, tab) => {
     switch (tab) {
       case "pending":
@@ -155,12 +162,15 @@ const Cart = () => {
         );
 
       case "negotiating":
+        const offerDenied = isOfferDenied(item);
         return (
           <>
-            <span className="status-text">Under Negotiation</span>
+            <span className="status-text">
+              {offerDenied ? "Offer Denied - Please Resend" : "Under Negotiation"}
+            </span>
             <div className="button-group">
               <button className="resend-button" onClick={() => handleShowRequestModal(item)}>
-                Send Request
+                {offerDenied ? "Resend Offer" : "Update Offer"}
               </button>
               <button
                 className="cancel-button"
