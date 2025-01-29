@@ -6,8 +6,6 @@ import EditItemModal from "../modules/EditItemModal";
 import ItemCard from "../modules/ItemCard";
 import "./Cart.css";
 
-const PERSONID = 1;
-
 const Sell = () => {
   const [activeTab, setActiveTab] = useState("available");
   const [showRequestModal, setShowRequestModal] = useState(false);

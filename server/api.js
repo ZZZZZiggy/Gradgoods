@@ -43,7 +43,7 @@ router.post("/initsocket", (req, res) => {
 // |------------------------------|
 // | write your API methods below!|
 // |------------------------------|
-const PERSONID = 1; // Temporary user ID for testing
+const PERSONID = 2; // Temporary user ID for testing
 // datafiles
 const product1 = {
   _id: 1,
