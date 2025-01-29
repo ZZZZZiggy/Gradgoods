@@ -76,6 +76,7 @@ const Sell = () => {
     }
   };
 
+  // construct new product
   const handleNewItemSubmit = async () => {
     const currentDate = new Date().toISOString().split("T")[0];
     const newItemWithDefaults = {
@@ -114,7 +115,6 @@ const Sell = () => {
       });
     } catch (err) {
       console.error("Failed to create product:", err);
-      // TODO: 显示错误消息给用户
     }
   };
 

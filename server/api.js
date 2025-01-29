@@ -161,6 +161,87 @@ const product6 = {
 };
 const products = [product1, product2, product3, product4, product5, product6];
 
+const people = [
+  {
+    _id: 1,
+    userName: "Laowang",
+    verified: true,
+    email: "xiang949@mit.edu",
+    avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+    address: {
+      street: "String",
+      city: "String",
+      zip: "02139",
+      location: {
+        type: "Point",
+        coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+      },
+    },
+    createdAt: "2024-01-20",
+    updatedAt: "2024-01-20",
+  },
+  {
+    _id: 2,
+    userName: "Xiaowang",
+    verified: true,
+    email: "xiang949@mit.edu",
+    avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+    address: {
+      street: "String",
+      city: "String",
+      zip: "02139",
+      location: {
+        type: "Point",
+        coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+      },
+    },
+    createdAt: "2024-01-20",
+    updatedAt: "2024-01-20",
+  },
+];
+
+const neigotiation = [
+  {
+    _id: 1,
+    productId: 5, // References Product._id
+    buyerId: 1, // References Person._id
+    sellerId: 2, // References Person._id
+    status: {
+      state: "rejected", // "pending" | "accepted" | "rejected" | "completed"
+      updatedAt: "2024-01-20",
+    },
+    offers: [
+      {
+        price: 25,
+        message: "I'm poor, but I want to buy this product",
+        createdAt: "2024-01-20",
+        createdBy: 1, // References Person._id
+      },
+    ],
+    createdAt: "2024-01-20",
+    updatedAt: "2024-01-20",
+  },
+  {
+    _id: 2,
+    productId: 1, // References Product._id
+    buyerId: 2, // References Person._id
+    sellerId: 1, // References Person._id
+    status: {
+      state: "rejected", // "pending" | "accepted" | "rejected" | "completed"
+      updatedAt: "2024-01-20",
+    },
+    offers: [
+      {
+        price: 25,
+        message: "I'm poorlllll, but I want to buy this product",
+        createdAt: "2024-01-20",
+        createdBy: 2, // References Person._id
+      },
+    ],
+    createdAt: "2024-01-21",
+    updatedAt: "2024-01-21",
+  },
+];
 router.get("/products", (req, res) => {
   try {
     res.send(products);
@@ -170,15 +251,13 @@ router.get("/products", (req, res) => {
   }
 });
 
-// 添加新商品
 router.post("/products", (req, res) => {
-  // 暂时移除 auth.ensureLoggedIn 方便测试
   try {
     const currentDate = new Date().toISOString().split("T")[0];
     const newProduct = {
       _id: products.length + 1,
-      ownerId: 1, // 临时ID
-      owner: "seller1", // 临时名称
+      ownerId: 1,
+      owner: "seller1",
       name: req.body.name,
       prize: req.body.prize,
       method: req.body.method,
@@ -196,7 +275,7 @@ router.post("/products", (req, res) => {
     };
 
     products.push(newProduct);
-    console.log("New product added:", newProduct); // 添加调试日志
+    console.log("New product added:", newProduct);
     res.send(newProduct);
   } catch (err) {
     console.log(`Error creating product: ${err}`);
@@ -208,7 +287,6 @@ router.post("/address", auth.ensureLoggedIn, async (req, res) => {
   try {
     const { formatted_address, lat, lng } = req.body;
 
-    // Update or create address
     const address = await Address.findOneAndUpdate(
       { userId: req.user._id },
       {

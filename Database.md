@@ -31,13 +31,11 @@
 {
   "_id": ObjectId,
   "ownerId": ObjectId,  // References Person._id
+  "owner": String, // owner Name
   "name": String,
   "price": Number,
   "method": ["Pickup", "Delivery"],
-  "dateRange": {
-    "start": Date,
-    "end": Date
-  },
+  "dateBy": Date,
   "description": String,
   "images": [String],
   "status": {
@@ -45,7 +43,6 @@
     "acceptedBy": ObjectId,  // References Person._id
     "acceptedAt": Date
   },
-  "category": String,
   "location": {
     "type": "Point",
     "coordinates": [Number, Number]

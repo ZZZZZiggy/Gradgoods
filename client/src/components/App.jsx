@@ -33,7 +33,7 @@ const App = () => {
 
   return (
     <UserContext.Provider value={userId}>
-      <NavBar userId={userId} handleLogin={handleLogin} handleLogout={handleLogout} />
+      <NavBar handleLogout={handleLogout} />
       <div className="App-container">
         <Outlet />
       </div>
