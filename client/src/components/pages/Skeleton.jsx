@@ -27,6 +27,7 @@ const App = () => {
 
   const matchProduct = (value, filter) => {
     let filtered = [...products];
+    console.log("Filter conditions:", filter); // Add debug logging
 
     // Text search
     if (value.trim() !== "") {
@@ -37,26 +38,42 @@ const App = () => {
 
     // Apply filter conditions
     if (filter) {
+      // Method filter
       if (filter.method && filter.method !== "all") {
+        console.log("Filtering by method:", filter.method);
         filtered = filtered.filter((product) => product.method === filter.method);
       }
-      if (filter.priceRange) {
+
+      // Price range filter
+      if (filter.priceRange && typeof filter.priceRange.min === "number") {
+        console.log("Filtering by price:", filter.priceRange);
         filtered = filtered.filter((product) => {
           if (filter.priceRange.max === 201) {
-            return product.prize >= filter.priceRange.min;
+            return product.price >= filter.priceRange.min;
           }
-          return product.prize >= filter.priceRange.min && product.prize <= filter.priceRange.max;
+          return product.price >= filter.priceRange.min && product.price <= filter.priceRange.max;
         });
       }
-      if (filter.place) {
+
+      // Place (distance) filter
+      if (filter.place && typeof filter.place.min === "number") {
+        console.log("Filtering by distance:", filter.place);
         filtered = filtered.filter((product) => {
           if (filter.place.max === 5) {
-            return product.diatance >= filter.place.min;
+            return product.distance >= filter.place.min;
           }
-          return product.diatance >= filter.place.min && product.diatance <= filter.place.max;
+          return product.distance >= filter.place.min && product.distance <= filter.place.max;
         });
       }
+
+      // Date range filter (if needed)
+      if (filter.dateRange) {
+        console.log("Filtering by date:", filter.dateRange);
+        // Add date filtering logic here if needed
+      }
     }
+
+    console.log("Filtered results:", filtered.length);
 
     if (filtered.length === 0) {
       setNoMatchMessage(true);

@@ -59,26 +59,11 @@ const product1 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
-    offers: [
-      // {
-      //   price: 25,
-      //   message: "I'm poor, but I want to buy this product",
-      //   createdAt: "2024-01-20",
-      //   buyerId: 2, // References Person._id
-      //   offerStatus: false,
-      // },
-      // {
-      //   price: 26,
-      //   message: "I'm pooeewer, but I want to buy this product",
-      //   createdAt: "2024-01-21",
-      //   buyerId: 3, // References Person._id
-      //   offerStatus: false,
-      // },
-    ],
+    offers: [],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  diatance: 1,
+  distance: 1,
 };
 const product2 = {
   _id: 2,
@@ -94,26 +79,11 @@ const product2 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
-    offers: [
-      // {
-      //   price: 25,
-      //   message: "I'm poor, but I want to buy this product",
-      //   createdAt: "2024-01-20",
-      //   buyerId: 2, // References Person._id
-      //   Accepted: false,
-      // },
-      // {
-      //   price: 26,
-      //   message: "I'm pooeewer, but I want to buy this product",
-      //   createdAt: "2024-01-21",
-      //   buyerId: 3, // References Person._id
-      //   Accepted: false,
-      // },
-    ],
+    offers: [],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  diatance: 1,
+  distance: 1,
 };
 const product3 = {
   _id: 3,
@@ -129,26 +99,11 @@ const product3 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
-    offers: [
-      // {
-      //   price: 25,
-      //   message: "I'm poor, but I want to buy this product",
-      //   createdAt: "2024-01-20",
-      //   buyerId: 2, // References Person._id
-      //   Accepted: false,
-      // },
-      // {
-      //   price: 26,
-      //   message: "I'm pooeewer, but I want to buy this product",
-      //   createdAt: "2024-01-21",
-      //   buyerId: 3, // References Person._id
-      //   Accepted: false,
-      // },
-    ],
+    offers: [],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  diatance: 1,
+  distance: 1,
 };
 const product4 = {
   _id: 4,
@@ -164,26 +119,11 @@ const product4 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
-    offers: [
-      // {
-      //   price: 25,
-      //   message: "I'm poor, but I want to buy this product",
-      //   createdAt: "2024-01-20",
-      //   buyerId: 2, // References Person._id
-      //   Accepted: false,
-      // },
-      // {
-      //   price: 26,
-      //   message: "I'm pooeewer, but I want to buy this product",
-      //   createdAt: "2024-01-21",
-      //   buyerId: 3, // References Person._id
-      //   Accepted: false,
-      // },
-    ],
+    offers: [],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  diatance: 1,
+  distance: 1,
 };
 const product5 = {
   _id: 5,
@@ -199,26 +139,11 @@ const product5 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
-    offers: [
-      // {
-      //   price: 25,
-      //   message: "I'm poor, but I want to buy this product",
-      //   createdAt: "2024-01-20",
-      //   buyerId: 2, // References Person._id
-      //   Accepted: false,
-      // },
-      // {
-      //   price: 26,
-      //   message: "I'm pooeewer, but I want to buy this product",
-      //   createdAt: "2024-01-21",
-      //   buyerId: 3, // References Person._id
-      //   Accepted: false,
-      // },
-    ],
+    offers: [],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  diatance: 1,
+  distance: 1,
 };
 const product6 = {
   _id: 6,
@@ -234,26 +159,11 @@ const product6 = {
     isAccepted: false,
     acceptedBy: null,
     acceptedAt: null,
-    offers: [
-      // {
-      //   price: 25,
-      //   message: "I'm poor, but I want to buy this product",
-      //   createdAt: "2024-01-20",
-      //   buyerId: 2, // References Person._id
-      //   Accepted: false,
-      // },
-      // {
-      //   price: 26,
-      //   message: "I'm pooeewer, but I want to buy this product",
-      //   createdAt: "2024-01-21",
-      //   buyerId: 3, // References Person._id
-      //   Accepted: false,
-      // },
-    ],
+    offers: [],
   },
   createdAt: "2024-01-20",
   updatedAt: "2024-01-20",
-  diatance: 1,
+  distance: 1,
 };
 const products = [product1, product2, product3, product4, product5, product6];
 console.log(products);
@@ -501,32 +411,46 @@ router.post("/products/deny-offer", (req, res) => {
   }
 });
 
-router.post("/address", auth.ensureLoggedIn, async (req, res) => {
+router.post("/address", (req, res) => {
   try {
-    const { formatted_address, lat, lng } = req.body;
+    const userId = PERSONID; // Using the test user ID
+    const { street, city, zip, lat, lng } = req.body;
 
-    const address = await Address.findOneAndUpdate(
-      { userId: req.user._id },
-      {
-        formatted_address,
-        lat,
-        lng,
-        updatedAt: Date.now(),
+    const user = people.find((p) => p._id === userId);
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    // Update user's address with the new format
+    user.address = {
+      street: street,
+      city: city,
+      zip: zip,
+      location: {
+        type: "Point",
+        coordinates: [lat, lng], // [latitude, longitude]
       },
-      { upsert: true, new: true }
-    );
+    };
 
-    res.send(address);
+    user.updatedAt = new Date().toISOString();
+
+    res.send(user.address);
   } catch (err) {
     console.log(`Error saving address: ${err}`);
     res.status(500).send({ error: "Error saving address" });
   }
 });
 
-router.get("/address", auth.ensureLoggedIn, async (req, res) => {
+router.get("/address", (req, res) => {
   try {
-    const address = await Address.findOne({ userId: req.user._id });
-    res.send(address || {});
+    const userId = PERSONID; // Using the test user ID
+    const user = people.find((p) => p._id === userId);
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    res.send(user.address || {});
   } catch (err) {
     console.log(`Error fetching address: ${err}`);
     res.status(500).send({ error: "Error fetching address" });
@@ -756,5 +680,5 @@ router.all("*", (req, res) => {
   console.log(`API route not found: ${req.method} ${req.url}`);
   res.status(404).send({ msg: "API route not found" });
 });
-console.log(product4);
+console.log(people[0]);
 module.exports = router;
