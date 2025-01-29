@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import "./Cart.css";
@@ -11,71 +11,74 @@ const Cart = () => {
     price: "",
     message: "",
   });
-  const [sentRequests, setSentRequests] = useState(new Set());
-  const tabs = ["pending", "negotiating", "deal"];
+  const [cartData, setCartData] = useState({ items: [] });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Combined sample data
-  const allRequests = [
-    {
-      id: 1,
-      image: "/IMG_E103515C1907-1.jpeg",
-      name: "Sample Product 1",
-      price: 99.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      acceptStatus: null, // pending
-      method: "Pickup",
-    },
-    {
-      id: 4,
-      image: "/1.jpg",
-      name: "Sample Product 1",
-      price: 99.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      acceptStatus: null, // pending
-      method: "Pickup",
-    },
-    {
-      id: 5,
-      image: "/1.jpg",
-      name: "Sample Product 1",
-      price: 99.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      acceptStatus: null, // pending
-      method: "Pickup",
-    },
-    {
-      id: 2,
-      image: "/1.jpg",
-      name: "Sample Product 2",
-      price: 149.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      replyDate: "2024-01-21",
-      acceptStatus: false, // negotiating
-      method: "Delivery",
-    },
-    {
-      id: 3,
-      image: "/1.jpg",
-      name: "Sample Product 3",
-      price: 199.99,
-      description: "Product description here",
-      sentDate: "2024-01-20",
-      replyDate: "2024-01-21",
-      acceptStatus: true, // deal
-      method: "Pickup",
-    },
-  ];
+  const tabs = ["pending", "negotiating", "deal"];
 
-  const [requests, setRequests] = useState(allRequests);
+  useEffect(() => {
+    fetchCartData();
+  }, []);
 
-  const handleRemoveFromCart = (id) => {
-    setRequests((prev) => prev.filter((item) => item.id !== id));
+  const fetchCartData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/cart");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch cart data");
+      }
+
+      console.log("Received cart data:", data);
+      setCartData(data);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update the filtering logic
+  const filteredItems = {
+    pending: cartData.items.filter(
+      (item) => item.status === "pending" && !item.product.status.isAccepted
+    ),
+    negotiating: cartData.items.filter(
+      (item) => item.status === "negotiating" && !item.product.status.isAccepted
+    ),
+    deal: cartData.items.filter(
+      (item) =>
+        item.status === "deal" ||
+        (item.product.status.isAccepted && item.product.status.acceptedBy === PERSONID)
+    ),
+  };
+
+  const handleRemoveFromCart = async (id) => {
+    try {
+      const response = await fetch("/api/cart/remove", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId: id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Failed to remove item");
+        return;
+      }
+
+      await fetchCartData(); // Refresh cart data after successful removal
+    } catch (err) {
+      console.error("Error removing item:", err);
+      alert("Failed to remove item from cart");
+    }
   };
 
   const handleProductClick = (item) => {
@@ -86,13 +89,6 @@ const Cart = () => {
   const handleCloseProductModal = () => {
     setShowProductModal(false);
     setSelectedProduct(null);
-  };
-
-  // Filter requests based on status
-  const sampleRequests = {
-    pending: requests.filter((item) => item.acceptStatus === null),
-    negotiating: requests.filter((item) => item.acceptStatus === false),
-    deal: requests.filter((item) => item.acceptStatus === true),
   };
 
   const handleCancel = (id) => {
@@ -109,30 +105,50 @@ const Cart = () => {
     setRequestDetails({ price: "", message: "" });
   };
 
-  const handleSendRequest = () => {
-    // Here you would typically send the request to your backend
-    console.log("Sending request for item:", selectedItem.id, requestDetails);
-    setSentRequests((prev) => new Set([...prev, selectedItem.id]));
-    handleCloseRequestModal();
+  const handleSendRequest = async () => {
+    try {
+      const response = await fetch("/api/cart/make-offer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: selectedItem.productId,
+          price: Number(requestDetails.price),
+          message: requestDetails.message,
+          Accepted: null,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Failed to send request");
+        return;
+      }
+
+      await fetchCartData(); // Refresh cart data after successful offer
+      handleCloseRequestModal();
+    } catch (err) {
+      console.error("Error sending request:", err);
+      alert("Failed to send request");
+    }
   };
 
   const renderCardStatus = (item, tab) => {
     switch (tab) {
       case "pending":
-        return sentRequests.has(item.id) ? (
+        return (
           <>
-            <span className="status-text">Request Sent</span>
-            <span className="sent-date">{new Date().toLocaleDateString()}</span>
-            <button className="delete-button" onClick={() => handleRemoveFromCart(item.id)}>
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
+            {item.priceChange?.hasChanged && (
+              <span className="price-change-alert">
+                Price {item.priceChange.difference > 0 ? "increased" : "decreased"} by $
+                {Math.abs(item.priceChange.difference)}
+              </span>
+            )}
             <button className="edit-button" onClick={() => handleShowRequestModal(item)}>
               Send Request
             </button>
-            <button className="delete-button" onClick={() => handleRemoveFromCart(item.id)}>
+            <button className="delete-button" onClick={() => handleRemoveFromCart(item.productId)}>
               Remove
             </button>
           </>
@@ -141,13 +157,15 @@ const Cart = () => {
       case "negotiating":
         return (
           <>
-            <span className="status-text">Request Denied</span>
-            <span className="sent-date">Replied on: {item.replyDate}</span>
+            <span className="status-text">Under Negotiation</span>
             <div className="button-group">
               <button className="resend-button" onClick={() => handleShowRequestModal(item)}>
-                Resend Request
+                Send Request
               </button>
-              <button className="cancel-button" onClick={() => handleRemoveFromCart(item.id)}>
+              <button
+                className="cancel-button"
+                onClick={() => handleRemoveFromCart(item.productId)}
+              >
                 Cancel Deal
               </button>
             </div>
@@ -158,10 +176,7 @@ const Cart = () => {
         return (
           <>
             <span className="status-text">Deal Confirmed</span>
-            <span className="sent-date">Confirmed on: {item.replyDate}</span>
-            <span className="ready-status">
-              Ready for {item.method === "Pickup" ? "Pickup" : "Delivery"}
-            </span>
+            <span className="ready-status">Ready for {item.product.method}</span>
           </>
         );
 
@@ -170,9 +185,12 @@ const Cart = () => {
     }
   };
 
+  if (loading) return <div>Loading cart data...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="cart-container">
-      <h1 className="cart-title">My Purchase Requests</h1>
+      <h1 className="cart-title">My Cart</h1>
 
       <div className="tabs-container">
         {tabs.map((tab) => (
@@ -187,18 +205,18 @@ const Cart = () => {
       </div>
 
       <div className="requests-container">
-        {sampleRequests[activeTab]?.map((item) => (
-          <div key={item.id} className="request-card">
+        {filteredItems[activeTab]?.map((item) => (
+          <div key={item.productId} className="request-card">
             <div className="card-image" onClick={() => handleProductClick(item)}>
-              <img src={item.image} alt={item.name} />
+              <img src={item.product.image} alt={item.product.name} />
             </div>
 
             <div className="card-details">
               <h3 className="product-name" onClick={() => handleProductClick(item)}>
-                {item.name}
+                {item.product.name}
               </h3>
-              <p className="product-price">${item.price}</p>
-              <p className="product-description">{item.description}</p>
+              <p className="product-price">${item.currentPrice}</p>
+              <p className="product-description">{item.product.description}</p>
             </div>
 
             <div className="card-status">{renderCardStatus(item, activeTab)}</div>

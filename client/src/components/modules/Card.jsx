@@ -8,13 +8,56 @@ const ProductCard = ({ product }) => {
 
   const handleOpen = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
-  const handleAddToCart = () => {
-    // Future cart functionality
-    console.log("Added to cart:", product);
+  const handleAddToCart = async () => {
+    try {
+      const response = await fetch("/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId: product._id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Failed to add to cart");
+        return;
+      }
+
+      alert("Successfully added to cart!");
+      handleClose();
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      alert("Failed to add to cart");
+    }
   };
-  const handleOrder = () => {
-    // Future order functionality
-    console.log("Ordered:", product);
+
+  const handleOrder = async () => {
+    try {
+      const response = await fetch("/api/cart/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: product._id,
+          price: product.price, // 使用原始价格，也可以添加议价功能
+          message: "I want to buy this product", // 可以添加输入框让用户输入消息
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Failed to process order");
+        return;
+      }
+
+      alert("Order processed successfully!");
+      handleClose();
+    } catch (err) {
+      console.error("Error processing order:", err);
+      alert("Failed to process order");
+    }
   };
 
   return (

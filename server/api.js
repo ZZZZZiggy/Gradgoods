@@ -278,11 +278,20 @@ const people = [
     cart: {
       items: [
         {
-          productId: 1, // 引用商品ID
+          productId: 1,
           addedAt: "2024-01-20",
-          quantity: 1,
-          savedPrice: 100, // 保存加入购物车时的价格
-          notes: "可选备注",
+          savedPrice: 100,
+          currentPrice: 100,
+          priceChanged: false,
+          status: "pending",
+        },
+        {
+          productId: 2,
+          addedAt: "2024-01-20",
+          savedPrice: 100,
+          currentPrice: 100,
+          priceChanged: false,
+          status: "pending",
         },
       ],
       lastUpdated: "2024-01-20",
@@ -306,11 +315,12 @@ const people = [
     cart: {
       items: [
         {
-          productId: 1, // 引用商品ID
+          productId: 1,
           addedAt: "2024-01-20",
-          quantity: 1,
           savedPrice: 100, // 保存加入购物车时的价格
-          notes: "可选备注",
+          currentPrice: 100, // 当前商品实际价格
+          priceChanged: false, // 标记价格是否发生变化
+          status: "deal",
         },
       ],
       lastUpdated: "2024-01-20",
@@ -358,7 +368,7 @@ router.post("/products", (req, res) => {
 
     products.push(newProduct);
 
-    // 确保返回的对象包含所有必要字段
+    // make sure to send back the new product
     res.send(newProduct);
   } catch (err) {
     console.log(`Error creating product: ${err}`);
@@ -374,6 +384,24 @@ router.post("/products/edit", (req, res) => {
 
     if (productIndex === -1) {
       return res.status(404).send({ error: "Product not found" });
+    }
+
+    // 如果价格发生变化，更新所有购物车中的该商品
+    if (updates.price !== products[productIndex].price) {
+      people.forEach((person) => {
+        if (person.cart?.items) {
+          person.cart.items = person.cart.items.map((item) => {
+            if (item.productId === id) {
+              return {
+                ...item,
+                currentPrice: updates.price,
+                priceChanged: true,
+              };
+            }
+            return item;
+          });
+        }
+      });
     }
 
     // Update the product
@@ -498,6 +526,224 @@ router.get("/address", auth.ensureLoggedIn, async (req, res) => {
   } catch (err) {
     console.log(`Error fetching address: ${err}`);
     res.status(500).send({ error: "Error fetching address" });
+  }
+});
+
+const PERSONID = 1; // Temporary user ID for testing
+
+router.get("/cart", (req, res) => {
+  try {
+    console.log("Fetching cart for user:", PERSONID);
+    const user = people.find((p) => p._id === PERSONID);
+
+    if (!user) {
+      console.log("User not found:", PERSONID);
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    if (!user.cart) {
+      console.log("No cart found for user:", PERSONID);
+      return res.send({ items: [] });
+    }
+
+    const cartWithDetails = {
+      ...user.cart,
+      items: user.cart.items
+        .map((item) => {
+          const product = products.find((p) => p._id === item.productId);
+          if (!product) {
+            console.log("Product not found:", item.productId);
+            return null;
+          }
+
+          // Update cart item status if product is accepted by this user
+          if (product.status.isAccepted && product.status.acceptedBy === PERSONID) {
+            item.status = "deal";
+          }
+
+          return {
+            ...item,
+            product,
+            priceChange: {
+              hasChanged: item.priceChanged,
+              difference: product.price - item.savedPrice,
+            },
+          };
+        })
+        .filter(Boolean),
+    };
+
+    console.log("Successfully fetched cart:", cartWithDetails);
+    res.send(cartWithDetails);
+  } catch (err) {
+    console.error("Detailed error in /api/cart:", err);
+    res.status(500).send({ error: "Error fetching cart data", details: err.message });
+  }
+});
+
+// Add to cart with pending status
+router.post("/cart/add", (req, res) => {
+  try {
+    const { productId } = req.body;
+    const userId = PERSONID; // 临时使用，之后改为 req.user._id
+
+    const user = people.find((p) => p._id === userId);
+    const product = products.find((p) => p._id === productId);
+
+    if (!user || !product) {
+      return res.status(404).send({ error: "User or product not found" });
+    }
+
+    // Add item to cart
+    if (!user.cart) {
+      user.cart = { items: [] };
+    }
+
+    // Check if item already exists in cart
+    const existingItem = user.cart.items.find((item) => item.productId === productId);
+    if (existingItem) {
+      return res.status(400).send({ error: "Item already in cart" });
+    }
+
+    // Add new item
+    const cartItem = {
+      productId,
+      addedAt: new Date().toISOString(),
+      savedPrice: product.price,
+      currentPrice: product.price,
+      priceChanged: false,
+      status: "pending",
+    };
+
+    user.cart.items.push(cartItem);
+    user.cart.lastUpdated = new Date().toISOString();
+
+    res.send(cartItem);
+  } catch (err) {
+    console.error("Error adding to cart:", err);
+    res.status(500).send({ error: "Error adding to cart" });
+  }
+});
+
+// Direct order with offer
+router.post("/cart/order", (req, res) => {
+  try {
+    const { productId, price, message } = req.body;
+    const userId = PERSONID; // 临时使用，之后改为 req.user._id
+
+    const user = people.find((p) => p._id === userId);
+    const product = products.find((p) => p._id === productId);
+
+    if (!user || !product) {
+      return res.status(404).send({ error: "User or product not found" });
+    }
+
+    // Add item to cart with deal status
+    if (!user.cart) {
+      user.cart = { items: [] };
+    }
+
+    // Create new cart item
+    const cartItem = {
+      productId,
+      addedAt: new Date().toISOString(),
+      savedPrice: product.price,
+      currentPrice: product.price,
+      priceChanged: false,
+      status: "deal",
+    };
+
+    // Update product status
+    const now = new Date().toISOString();
+    product.status = {
+      isAccepted: true,
+      acceptedBy: userId,
+      acceptedAt: now,
+      offers: [
+        {
+          price,
+          message,
+          createdAt: now,
+          buyerId: userId,
+          Accepted: true,
+        },
+      ],
+    };
+
+    // Update or add cart item
+    const existingItemIndex = user.cart.items.findIndex((item) => item.productId === productId);
+    if (existingItemIndex !== -1) {
+      user.cart.items[existingItemIndex] = cartItem;
+    } else {
+      user.cart.items.push(cartItem);
+    }
+
+    user.cart.lastUpdated = now;
+
+    res.send({ cartItem, product });
+  } catch (err) {
+    console.error("Error processing order:", err);
+    res.status(500).send({ error: "Error processing order" });
+  }
+});
+
+// Remove item from cart
+router.post("/cart/remove", (req, res) => {
+  try {
+    const { productId } = req.body;
+    const userId = PERSONID;
+
+    const user = people.find((p) => p._id === userId);
+    if (!user || !user.cart) {
+      return res.status(404).send({ error: "Cart not found" });
+    }
+
+    // Remove item from cart
+    user.cart.items = user.cart.items.filter((item) => item.productId !== productId);
+    user.cart.lastUpdated = new Date().toISOString();
+
+    res.send({ message: "Item removed successfully" });
+  } catch (err) {
+    console.error("Error removing from cart:", err);
+    res.status(500).send({ error: "Error removing item from cart" });
+  }
+});
+
+// Add offer to product and update cart status
+router.post("/cart/make-offer", (req, res) => {
+  try {
+    const { productId, price, message } = req.body;
+    const userId = PERSONID;
+
+    const user = people.find((p) => p._id === userId);
+    const product = products.find((p) => p._id === productId);
+
+    if (!user || !product) {
+      return res.status(404).send({ error: "User or product not found" });
+    }
+
+    // Add offer to product
+    const now = new Date().toISOString();
+    const newOffer = {
+      price,
+      message,
+      createdAt: now,
+      buyerId: userId,
+      Accepted: false,
+    };
+
+    product.status.offers.push(newOffer);
+
+    // Update cart item status
+    const cartItem = user.cart.items.find((item) => item.productId === productId);
+    if (cartItem) {
+      cartItem.status = "negotiating";
+    }
+
+    res.send({ product, cartItem });
+  } catch (err) {
+    console.error("Error making offer:", err);
+    res.status(500).send({ error: "Error making offer" });
   }
 });
 
