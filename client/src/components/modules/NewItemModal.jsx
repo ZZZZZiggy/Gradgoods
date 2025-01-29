@@ -2,15 +2,40 @@ import React from "react";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 
-const NewItemModal = ({
-  show,
-  onHide,
-  newItem,
-  setNewItem,
-  handleImageUpload,
-  onSubmit,
-  userAddress,
-}) => {
+const NewItemModal = ({ show, onHide, newItem, setNewItem, onSubmit }) => {
+  const handleLocalImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Create FileReader instance
+        const reader = new FileReader();
+
+        // Set up FileReader onload handler
+        reader.onload = () => {
+          const base64String = reader.result;
+          // Update state with both base64 and preview
+          setNewItem({
+            ...newItem,
+            image: base64String,
+            imagePreview: URL.createObjectURL(file),
+          });
+        };
+
+        // Set up error handler
+        reader.onerror = (error) => {
+          console.error("Error reading file:", error);
+          alert("Error uploading image. Please try again.");
+        };
+
+        // Read the file as Data URL (base64)
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error("Error converting image:", err);
+        alert("Error uploading image. Please try again.");
+      }
+    }
+  };
+
   return (
     <Modal show={show} onHide={onHide} centered className="product-modal">
       <Modal.Header closeButton className="modal-header">
@@ -25,7 +50,7 @@ const NewItemModal = ({
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
+                onChange={handleLocalImageUpload}
                 style={{ display: "none" }}
               />
               <i className="fas fa-cloud-upload-alt"></i>

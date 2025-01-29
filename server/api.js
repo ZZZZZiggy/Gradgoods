@@ -178,16 +178,19 @@ router.post("/products", async (req, res) => {
       method: req.body.method,
       dateby: new Date().toISOString().split("T")[0],
       description: req.body.description,
-      image: req.body.image,
-      location: req.body.location,
-      distance: calculateDistance(buyerLocation, req.body.location?.coordinates),
+      image: req.body.image, // Expecting base64 string from frontend
+      location: {
+        type: "Point",
+        coordinates: buyerLocation || [42.3601, -71.0942], // Use buyer's location or default to Boston
+      },
+      distance: calculateDistance(buyerLocation, buyerLocation) || 0,
     });
 
     const savedProduct = await newProduct.save();
     res.send(savedProduct);
   } catch (err) {
     console.log(`Error creating product: ${err}`);
-    res.status(500).send({ error: "Error creating product" });
+    res.status(500).send({ error: "Error creating product", details: err.message });
   }
 });
 
