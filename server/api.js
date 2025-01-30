@@ -54,56 +54,6 @@ router.post("/initsocket", (req, res) => {
 // | write your API methods below!|
 // |------------------------------|
 
-// datafiles
-
-// const people = [
-//   {
-//     _id: 1,
-//     userName: "Laowang",
-//     verified: true,
-//     email: "xiang949@mit.edu",
-//     avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-//     address: {
-//       street: "String",
-//       city: "String",
-//       zip: "02139",
-//       location: {
-//         type: "Point",
-//         coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
-//       },
-//     },
-//     createdAt: "2024-01-20",
-//     updatedAt: "2024-01-20",
-//     cart: {
-//       items: [],
-//       lastUpdated: "2024-01-20",
-//     },
-//   },
-//   {
-//     _id: 2,
-//     userName: "Xiaowang",
-//     verified: true,
-//     email: "xiang949@mit.edu",
-//     avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-//     address: {
-//       street: "String",
-//       city: "String",
-//       zip: "02139",
-//       location: {
-//         type: "Point",
-//         coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
-//       },
-//     },
-//     cart: {
-//       items: [],
-//       lastUpdated: "2024-01-20",
-//     },
-//     createdAt: "2024-01-20",
-//     updatedAt: "2024-01-20",
-//   },
-// ];
-
-// 将获取用户数据的逻辑封装在一个异步函数中
 const getPeople = async () => {
   try {
     const formattedPeople = await User.find();
@@ -126,13 +76,12 @@ const getPeople = async () => {
       updatedAt: person.updatedAt ? person.updatedAt.toISOString().split("T")[0] : "",
       cart: {
         items: person?.cart?.items || [],
-        lastUpdated: person?.cart?.lastUpdated
-          ? person.cart.lastUpdated.toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
+        lastUpdated: person?.cart?.lastUpdated || new Date().toISOString().split("T")[0],
       },
     }));
   } catch (err) {
     console.error("Error fetching users:", err);
+    console.error("Error details:", err.stack);
     return [];
   }
 };
@@ -179,7 +128,7 @@ const calculateDistance = (coords1, coords2) => {
 router.get("/allproducts", async (req, res) => {
   try {
     const user = people.find((p) => p._id === req.user._id.toString());
-    console.log("User found:", user);
+    // console.log("User found:", user);
     const userLocation = user?.address?.location?.coordinates;
 
     const products = await ProductModel.find({});
@@ -200,7 +149,8 @@ router.get("/products", async (req, res) => {
     return res.status(401).send({ error: "Not logged in" });
   }
   try {
-    const user = people.find((p) => p._id === req.user._id.toString());
+    const userId = req.user._id;
+    const user = await User.findById(userId);
     const userLocation = user?.address?.location?.coordinates;
 
     const products = await ProductModel.find({ ownerId: req.user._id });
@@ -216,37 +166,53 @@ router.get("/products", async (req, res) => {
   }
 });
 
-// Modify the product creation route
+// Finished
 router.post("/products", async (req, res) => {
   if (!req.user) {
     return res.status(401).send({ error: "Not logged in" });
   }
   try {
-    const buyer = people.find((p) => p._id === req.user._id.toString());
-    const buyerLocation = buyer?.address?.location?.coordinates;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    if (!user.address?.location?.coordinates) {
+      return res.status(400).send({
+        error: "Location required",
+        details: "Please set your address before creating a product",
+      });
+    }
+
     const currentDate = new Date().toISOString().split("T")[0];
 
     const newProduct = new ProductModel({
-      ownerId: req.user._id,
-      owner: "seller1",
+      ownerId: userId,
+      owner: user.userName,
       name: req.body.name,
       price: req.body.price,
       method: req.body.method,
       dateby: currentDate,
       description: req.body.description,
-      image: req.body.image, // Expecting base64 string from frontend
+      image: req.body.image,
       location: {
         type: "Point",
-        coordinates: buyerLocation || [42.3601, -71.0942], // Use buyer's location or default to Boston
+        coordinates: user.address.location.coordinates,
       },
-      distance: calculateDistance(buyerLocation, buyerLocation) || 0,
+      distance: 0,
     });
 
     const savedProduct = await newProduct.save();
+    console.log("Product created:", savedProduct);
     res.send(savedProduct);
   } catch (err) {
-    console.log(`Error creating product: ${err}`);
-    res.status(500).send({ error: "Error creating product", details: err.message });
+    console.error("Error creating product:", err);
+    res.status(500).send({
+      error: "Error creating product",
+      details: err.message,
+    });
   }
 });
 
@@ -254,22 +220,47 @@ router.post("/products", async (req, res) => {
 router.post("/products/edit", async (req, res) => {
   try {
     const { id, updates } = req.body;
-    const updatedProduct = await ProductModel.findByIdAndUpdate(
-      id,
-      { ...updates, updatedAt: new Date() },
-      { new: true }
-    );
+
+    const requiredFields = ["name", "price", "method", "description", "image"];
+    for (const field of requiredFields) {
+      if (updates[field] === undefined) {
+        return res.status(400).send({
+          error: "Missing required field",
+          field: field,
+        });
+      }
+    }
+
+    if (updates.image && !/^data:image\/[a-zA-Z]+;base64,/.test(updates.image)) {
+      return res.status(400).send({
+        error: "Invalid image format",
+        details: "Image must be a valid base64 string",
+      });
+    }
+
+    const updateData = {
+      ...updates,
+      updatedAt: new Date(),
+    };
+
+    const updatedProduct = await ProductModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedProduct) {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    // Still handle cart price updates with in-memory people array
     if (updates.price !== updatedProduct.price) {
-      people.forEach((person) => {
-        if (person.cart?.items) {
-          person.cart.items = person.cart.items.map((item) => {
-            if (item.productId === id) {
+      const usersWithProduct = await User.find({
+        "cart.items.productId": id,
+      });
+
+      await Promise.all(
+        usersWithProduct.map(async (user) => {
+          const updatedItems = user.cart.items.map((item) => {
+            if (item.productId.toString() === id) {
               return {
                 ...item,
                 currentPrice: updates.price,
@@ -278,14 +269,31 @@ router.post("/products/edit", async (req, res) => {
             }
             return item;
           });
-        }
-      });
+
+          user.cart.items = updatedItems;
+          user.cart.lastUpdated = new Date().toISOString();
+          await user.save();
+
+          const memoryUser = people.find((p) => p._id === user._id.toString());
+          if (memoryUser) {
+            memoryUser.cart = user.cart;
+          }
+        })
+      );
+
+      console.log(`Updated cart prices for product ${id}`);
     }
 
+    console.log("Product updated successfully:", updatedProduct);
     res.send(updatedProduct);
   } catch (err) {
     console.error("Error editing product:", err);
-    res.status(500).send({ error: "Error editing product" });
+    console.error("Error stack:", err.stack);
+    res.status(500).send({
+      error: "Error editing product",
+      details: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
@@ -310,60 +318,85 @@ router.post("/products/accept-offer", async (req, res) => {
     const { productId, offerIndex } = req.body;
     console.log("Accepting offer:", { productId, offerIndex });
 
-    const product = await ProductModel.findById(productId);
-    console.log("Found product:", product);
+    const product = await ProductModel.findById(productId).exec();
 
     if (!product) {
       return res.status(404).send({ error: "Product not found" });
     }
 
     if (!product.status?.offers || offerIndex >= product.status.offers.length) {
-      return res.status(400).send({ error: "Invalid offer index" });
+      return res.status(400).send({
+        error: "Invalid offer index",
+        details: "Offer data has changed. Refreshing data...",
+      });
     }
 
     const acceptedOffer = product.status.offers[offerIndex];
 
-    // Update product status
     product.status = {
       ...product.status,
       isAccepted: true,
       acceptedBy: acceptedOffer.buyerId,
       acceptedAt: new Date().toISOString(),
       acceptedOffer: acceptedOffer,
-      offers: [], // Clear other offers
+      offers: [],
     };
 
     const updatedProduct = await product.save();
-    res.send(updatedProduct);
+
+    const allProducts = await ProductModel.find({ ownerId: req.user._id });
+
+    res.send({
+      updatedProduct,
+      allProducts,
+      success: true,
+      message: "Offer accepted successfully",
+    });
   } catch (err) {
     console.error("Detailed error in accept-offer:", err);
     res.status(500).send({ error: "Error accepting offer", details: err.message });
   }
 });
 
+// finished
 router.post("/products/deny-offer", async (req, res) => {
   try {
     const { productId, offerIndex } = req.body;
-    const product = await ProductModel.findById(productId);
+
+    const product = await ProductModel.findById(productId).exec();
 
     if (!product) {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    if (!product.status.offers || offerIndex >= product.status.offers.length) {
-      return res.status(400).send({ error: "Invalid offer index" });
+    if (!product.status?.offers || offerIndex >= product.status.offers.length) {
+      return res.status(400).send({
+        error: "Invalid offer index",
+        details: "Offer data has changed. Refreshing data...",
+      });
     }
 
-    // Remove the denied offer from the offers array
     product.status.offers.splice(offerIndex, 1);
     const updatedProduct = await product.save();
-    res.send(updatedProduct);
+
+    const allProducts = await ProductModel.find({ ownerId: req.user._id });
+
+    res.send({
+      updatedProduct,
+      allProducts,
+      success: true,
+      message: "Offer denied successfully",
+    });
   } catch (err) {
     console.error("Error denying offer:", err);
-    res.status(500).send({ error: "Error denying offer" });
+    res.status(500).send({
+      error: "Error denying offer",
+      details: err.message,
+    });
   }
 });
 
+// finished
 router.post("/address", async (req, res) => {
   if (!req.user) {
     return res.status(401).send({ error: "Not logged in" });
@@ -382,7 +415,7 @@ router.post("/address", async (req, res) => {
       "address.formatted_address": formatted_address,
       "address.location": {
         type: "Point",
-        coordinates: [parseFloat(lng), parseFloat(lat)],
+        coordinates: [parseFloat(lat), parseFloat(lng)],
       },
       "address.updatedAt": new Date(),
     };
@@ -416,13 +449,15 @@ router.post("/address", async (req, res) => {
   }
 });
 
-router.get("/address", (req, res) => {
+// finished
+router.get("/address", async (req, res) => {
   if (!req.user) {
     return res.status(401).send({ error: "Not logged in" });
   }
   try {
-    const userId = req.user._id; // Using the test user ID
-    const user = people.find((p) => p._id === userId.toString());
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).send({ error: "User not found" });
@@ -435,6 +470,7 @@ router.get("/address", (req, res) => {
   }
 });
 
+// finished
 router.get("/cart", async (req, res) => {
   if (!req.user) {
     return res.status(401).send({ error: "Not logged in" });
@@ -505,6 +541,7 @@ router.get("/cart", async (req, res) => {
   }
 });
 
+// finished
 // Add to cart with pending status
 router.post("/cart/add", async (req, res) => {
   if (!req.user) {
@@ -568,6 +605,7 @@ router.post("/cart/add", async (req, res) => {
   }
 });
 
+// finished
 // Direct order with offer
 router.post("/cart/order", async (req, res) => {
   if (!req.user) {
@@ -590,7 +628,7 @@ router.post("/cart/order", async (req, res) => {
 
     // Create new cart item
     const cartItem = {
-      productId: productId.toString(),
+      productId,
       addedAt: new Date().toISOString(),
       savedPrice: product.price,
       currentPrice: product.price,
@@ -604,17 +642,10 @@ router.post("/cart/order", async (req, res) => {
       isAccepted: true,
       acceptedBy: userId,
       acceptedAt: now,
-      acceptedOffer: {
-        price: Number(price),
-        message: message || "",
-        createdAt: now,
-        buyerId: userId,
-        Accepted: true,
-      },
       offers: [
         {
-          price: Number(price),
-          message: message || "",
+          price,
+          message,
           createdAt: now,
           buyerId: userId,
           Accepted: true,
@@ -670,7 +701,7 @@ router.post("/cart/order", async (req, res) => {
 });
 
 // Remove item from cart
-router.post("/cart/remove", (req, res) => {
+router.post("/cart/remove", async (req, res) => {
   if (!req.user) {
     return res.status(401).send({ error: "Not logged in" });
   }
@@ -678,7 +709,7 @@ router.post("/cart/remove", (req, res) => {
     const { productId } = req.body;
     const userId = req.user._id;
 
-    const user = people.find((p) => p._id === userId.toString());
+    const user = await User.findById(userId);
     if (!user || !user.cart) {
       return res.status(404).send({ error: "Cart not found" });
     }
@@ -703,13 +734,15 @@ router.post("/cart/make-offer", async (req, res) => {
     const { productId, price, message } = req.body;
     const userId = req.user._id;
 
-    const user = people.find((p) => p._id === userId.toString());
+    // Get fresh data from database
+    const user = await User.findById(userId);
     const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
       return res.status(404).send({ error: "User or product not found" });
     }
 
+    // Add new offer to product
     const now = new Date().toISOString();
     const newOffer = {
       price,
@@ -723,19 +756,52 @@ router.post("/cart/make-offer", async (req, res) => {
       product.status = { offers: [] };
     }
     product.status.offers.push(newOffer);
-    await product.save();
+    const savedProduct = await product.save();
 
-    // Update cart item status
-    const cartItem = user.cart.items.find((item) => item.productId === productId);
-    if (cartItem) {
-      cartItem.status = "negotiating";
-      cartItem.lastOfferAccepted = null;
+    // Update cart item status in database
+    const updateResult = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        "cart.items.productId": productId,
+      },
+      {
+        $set: {
+          "cart.items.$.status": "negotiating",
+          "cart.items.$.lastOfferAccepted": null,
+          "cart.lastUpdated": now,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updateResult) {
+      console.log("Failed to update cart status");
     }
 
-    res.send({ product, cartItem });
+    // Update in-memory data
+    const memoryUser = people.find((p) => p._id === userId.toString());
+    if (memoryUser && memoryUser.cart) {
+      const cartItem = memoryUser.cart.items.find((item) => item.productId === productId);
+      if (cartItem) {
+        cartItem.status = "negotiating";
+        cartItem.lastOfferAccepted = null;
+      }
+      memoryUser.cart.lastUpdated = now;
+    }
+
+    res.send({
+      product: savedProduct,
+      cart: updateResult?.cart || null,
+      success: true,
+    });
   } catch (err) {
     console.error("Error making offer:", err);
-    res.status(500).send({ error: "Error making offer" });
+    console.error("Error stack:", err.stack);
+    res.status(500).send({
+      error: "Error making offer",
+      details: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
