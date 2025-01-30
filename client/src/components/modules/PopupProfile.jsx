@@ -22,6 +22,8 @@ const PopupProfile = ({ isHovered }) => {
   const autocompleteRef = useRef(null);
   const inputRef = useRef(null);
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
     get("/api/address").then((addr) => {
       if (addr.formatted_address) {
@@ -59,6 +61,13 @@ const PopupProfile = ({ isHovered }) => {
       });
     }
   }, [showAddressModal]);
+
+  useEffect(() => {
+    // 获取用户信息
+    get("/api/whoami").then((userData) => {
+      setUser(userData);
+    });
+  }, []);
 
   const validateEmail = (email) => {
     const eduEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.edu$/;
@@ -156,8 +165,7 @@ const PopupProfile = ({ isHovered }) => {
         {/* avatar */}
         <div className="popup-avatar">
           <Link to="/cart">
-            <img src="/1.jpg" alt="Avatar" />
-            {/* will be replaced with user's avatar */}
+            <img src={user?.avatar || "/1.jpg"} alt={user?.userName || "Avatar"} />
           </Link>
         </div>
 

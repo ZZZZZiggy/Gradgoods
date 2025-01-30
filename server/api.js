@@ -30,7 +30,14 @@ router.get("/whoami", (req, res) => {
     return res.send({});
   }
 
-  res.send({});
+  User.findById(req.user._id)
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      console.log(`Error finding user: ${err}`);
+      res.status(500).send({});
+    });
 });
 
 router.post("/initsocket", (req, res) => {
