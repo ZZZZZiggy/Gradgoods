@@ -63,3 +63,8 @@
   margin-bottom: 2rem;
   color: var(--black);
 }
+.login-button-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}

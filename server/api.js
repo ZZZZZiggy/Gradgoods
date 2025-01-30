@@ -120,13 +120,6 @@ const calculateDistance = (coords1, coords2) => {
 // import mongoose models
 const ProductModel = require("./models/product");
 
-// router.get("/allusers", (req, res) => {
-//   UserModel.find({}).then((people) => res.send(people));
-// });
-// router.get("/allproducts", (req, res) => {
-//   ProductModel.find({}).then((products) => res.send(products));
-// });
-
 // routers
 router.get("/allproducts", async (req, res) => {
   try {
