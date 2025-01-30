@@ -6,13 +6,13 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    verified: {
-      type: Boolean,
-      default: false,
-    },
-    email: {
+    googleId: {
       type: String,
       required: true,
+    },
+    verified: {
+      type: Boolean,
+      default: true,
     },
     avatar: {
       type: String,
@@ -26,11 +26,11 @@ const UserSchema = new mongoose.Schema(
         type: {
           type: String,
           enum: ["Point"],
-          required: true,
+          required: false,
         },
         coordinates: {
           type: [Number],
-          required: true,
+          required: false,
         },
       },
     },

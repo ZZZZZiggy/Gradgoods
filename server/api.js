@@ -30,7 +30,7 @@ router.get("/whoami", (req, res) => {
     return res.send({});
   }
 
-  res.send(req.user);
+  res.send({});
 });
 
 router.post("/initsocket", (req, res) => {
@@ -246,10 +246,10 @@ router.post("/products/delete", async (req, res) => {
 router.post("/products/accept-offer", async (req, res) => {
   try {
     const { productId, offerIndex } = req.body;
-    console.log("Accepting offer:", { productId, offerIndex }); // 添加调试日志
+    console.log("Accepting offer:", { productId, offerIndex });
 
     const product = await ProductModel.findById(productId);
-    console.log("Found product:", product); // 添加调试日志
+    console.log("Found product:", product);
 
     if (!product) {
       return res.status(404).send({ error: "Product not found" });
