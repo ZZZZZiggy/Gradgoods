@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import PopupProfile from "./PopupProfile";
 import "./NavBar.css";
 
 const NavBar = () => {
   const [isHovered, setIsHovered] = useState(false);
-  // use a ref to store the timeout
   const hoverTimeoutRef = useRef(null);
+  const location = useLocation();
 
   // mouse enter, clear the timeout to keep the popup
   const handleMouseEnter = () => {
@@ -33,18 +33,20 @@ const NavBar = () => {
               GradGoods
             </Link>
           </div>
-          <div
-            className="NavBar-profile-container"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <div className="NavBar-profile u-inlineBlock">
-              <Link to="/cart" className="NavBar-link">
-                PROFILE
-              </Link>
+          {location.pathname !== "/" && (
+            <div
+              className="NavBar-profile-container"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <div className="NavBar-profile u-inlineBlock">
+                <Link to="/cart" className="NavBar-link">
+                  PROFILE
+                </Link>
+              </div>
+              <PopupProfile isHovered={isHovered} />
             </div>
-            <PopupProfile isHovered={isHovered} />
-          </div>
+          )}
         </div>
       </nav>
     </>

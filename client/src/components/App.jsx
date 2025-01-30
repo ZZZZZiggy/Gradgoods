@@ -19,9 +19,17 @@ const App = () => {
   }, []);
 
   const handleLogin = (credentialResponse) => {
-    const userToken = credentialResponse.credential;
-    post("/api/login", { token: userToken }).then((user) => {
-      setUserId(user._id);
+    return new Promise((resolve, reject) => {
+      const userToken = credentialResponse.credential;
+      post("/api/login", { token: userToken })
+        .then((user) => {
+          setUserId(user._id);
+          resolve(user);
+        })
+        .catch((err) => {
+          console.error("Login API error:", err);
+          reject(err);
+        });
     });
   };
 

@@ -63,8 +63,24 @@
   margin-bottom: 2rem;
   color: var(--black);
 }
+
 .login-button-container {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+}
+
+.custom-login-button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: opacity 0.2s;
+}
+
+.custom-login-button:hover {
+  opacity: 0.9;
 }

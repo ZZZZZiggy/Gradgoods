@@ -1,32 +1,13 @@
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { get } from "../../utilities";
+import React, { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const location = useLocation();
+  const { userId } = useContext(UserContext);
 
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await get("/api/whoami");
-        setIsAuthenticated(!!user._id);
-      } catch (err) {
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+  if (!userId) {
+    // 未登录时重定向到首页
+    return <Navigate to="/" replace />;
   }
 
   return children;

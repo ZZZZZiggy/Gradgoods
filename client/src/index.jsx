@@ -7,6 +7,7 @@ import NotFound from "./components/pages/NotFound";
 import Cart from "./components/pages/Cart";
 import Sell from "./components/pages/Sell";
 import Home from "./components/pages/Home";
+import ProtectedRoute from "./components/modules/ProtectedRoute";
 
 import {
   createBrowserRouter,
@@ -24,9 +25,30 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route errorElement={<NotFound />} element={<App />}>
       <Route path="/" element={<Home />} />
-      <Route path="/market" element={<Skeleton />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/sell" element={<Sell />} />
+      <Route
+        path="/market"
+        element={
+          <ProtectedRoute>
+            <Skeleton />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cart"
+        element={
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sell"
+        element={
+          <ProtectedRoute>
+            <Sell />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/home" element={<Home />} />
     </Route>
   )

@@ -144,6 +144,12 @@ const PopupProfile = ({ isHovered }) => {
     };
   };
 
+  const handleLogout = () => {
+    post("/api/logout").then(() => {
+      navigate("/");
+    });
+  };
+
   return (
     <>
       <div className={`NavBar-popup ${isHovered ? "show" : ""}`}>
@@ -180,7 +186,9 @@ const PopupProfile = ({ isHovered }) => {
         {/* Logout, Verification */}
         <div className="popup-bottom">
           <div className="popup-bottom-item">
-            <Link to="/home">Logout</Link>
+            <Link to="#" onClick={handleLogout}>
+              Logout
+            </Link>
           </div>
           <div className="popup-bottom-item">
             <Link to="#" onClick={handleVerificationClick}>

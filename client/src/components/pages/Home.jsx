@@ -6,12 +6,16 @@ import "./Home.css";
 
 const Home = () => {
   const navigate = useNavigate();
-  const { handleLogin } = useContext(UserContext);
+  const { userId, handleLogin, handleLogout } = useContext(UserContext);
 
-  const handleGoogleSuccess = (credentialResponse) => {
-    console.log("Google login success:", credentialResponse);
-    handleLogin(credentialResponse);
-    navigate("/market");
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      console.log("Google login success:", credentialResponse);
+      await handleLogin(credentialResponse);
+      navigate("/market");
+    } catch (error) {
+      console.error("Login handling failed:", error);
+    }
   };
 
   const handleGoogleError = () => {
@@ -25,12 +29,25 @@ const Home = () => {
         <h1>Welcome to GradGoods</h1>
         <p>Your university marketplace for second-hand treasures</p>
         <div className="login-button-container">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            useOneTap={false}
-            flow="implicit"
-          />
+          {userId ? (
+            <button
+              className="custom-login-button"
+              onClick={() => {
+                handleLogout();
+                navigate("/");
+              }}
+            >
+              Sign out
+            </button>
+          ) : (
+            <GoogleLogin
+              text="signin_with"
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              flow="implicit"
+            />
+          )}
         </div>
       </div>
     </div>
