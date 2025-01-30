@@ -52,6 +52,10 @@ const UserSchema = new mongoose.Schema(
             enum: ["pending", "negotiating", "deal"],
           },
           lastOfferAccepted: Boolean,
+          acceptby: {
+            type: String,
+            default: "",
+          },
         },
       ],
       lastUpdated: String,

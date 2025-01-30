@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const ProductSchema = new mongoose.Schema(
   {
     ownerId: {
-      type: Number,
+      type: String,
       required: true,
     },
     owner: {
@@ -63,7 +63,7 @@ const ProductSchema = new mongoose.Schema(
         default: false,
       },
       acceptedBy: {
-        type: Number,
+        type: String,
         default: null,
       },
       acceptedAt: {
@@ -75,7 +75,7 @@ const ProductSchema = new mongoose.Schema(
           price: Number,
           message: String,
           createdAt: String,
-          buyerId: Number,
+          buyerId: String,
           Accepted: Boolean,
         },
       ],

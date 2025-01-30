@@ -700,6 +700,7 @@ router.post("/cart/order", async (req, res) => {
   }
 });
 
+// works
 // Remove item from cart
 router.post("/cart/remove", async (req, res) => {
   if (!req.user) {
@@ -715,8 +716,11 @@ router.post("/cart/remove", async (req, res) => {
     }
 
     // Remove item from cart
-    user.cart.items = user.cart.items.filter((item) => item.productId !== productId);
+    user.cart.items = user.cart.items.filter((item) => item.productId.toString() !== productId);
     user.cart.lastUpdated = new Date().toISOString();
+
+    // Save the changes to the database
+    await user.save();
 
     res.send({ message: "Item removed successfully" });
   } catch (err) {
@@ -725,6 +729,7 @@ router.post("/cart/remove", async (req, res) => {
   }
 });
 
+//works
 // Add offer to product and update cart status
 router.post("/cart/make-offer", async (req, res) => {
   if (!req.user) {

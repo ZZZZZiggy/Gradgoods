@@ -118,14 +118,24 @@ const Sell = () => {
       setIsSubmitting(true);
       setOperationError(null);
 
-      // Send accept request to server
       const response = await post("/api/products/accept-offer", {
         productId: itemId,
         offerIndex: offerIndex,
       });
 
-      // Update local state
-      setRequests((prev) => prev.map((item) => (item.id === itemId ? response : item)));
+      if (response.success) {
+        // 直接使用返回的更新后的产品列表
+        setRequests(
+          response.allProducts.map((product) => ({
+            ...product,
+            id: product._id,
+            listDate: product.createdAt,
+            price: product.price || 0,
+          }))
+        );
+      } else {
+        throw new Error(response.error || "Failed to accept offer");
+      }
     } catch (err) {
       setOperationError("Failed to accept offer. Please try again.");
       console.error(err);
@@ -139,14 +149,24 @@ const Sell = () => {
       setIsSubmitting(true);
       setOperationError(null);
 
-      // Send deny request to server
       const response = await post("/api/products/deny-offer", {
         productId: itemId,
         offerIndex: offerIndex,
       });
 
-      // Update local state
-      setRequests((prev) => prev.map((item) => (item.id === itemId ? response : item)));
+      if (response.success) {
+        // 直接使用返回的更新后的产品列表
+        setRequests(
+          response.allProducts.map((product) => ({
+            ...product,
+            id: product._id,
+            listDate: product.createdAt,
+            price: product.price || 0,
+          }))
+        );
+      } else {
+        throw new Error(response.error || "Failed to deny offer");
+      }
     } catch (err) {
       setOperationError("Failed to deny offer. Please try again.");
       console.error(err);
@@ -238,12 +258,13 @@ const Sell = () => {
 
   const filteredRequests = {
     available: requests.filter(
-      (item) => !item.status.isAccepted && (!item.status.offers || item.status.offers.length === 0)
+      (item) =>
+        !item.status?.isAccepted && (!item.status?.offers || item.status.offers.length === 0)
     ),
     negotiating: requests.filter(
-      (item) => !item.status.isAccepted && item.status.offers && item.status.offers.length > 0
+      (item) => !item.status?.isAccepted && item.status?.offers && item.status.offers.length > 0
     ),
-    deal: requests.filter((item) => item.status.isAccepted),
+    deal: requests.filter((item) => item.status?.isAccepted),
   };
 
   return (

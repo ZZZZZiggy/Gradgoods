@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { UserContext } from "../context/UserContext";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import "./Cart.css";
 
+// ...existing code...
+
 const Cart = () => {
+  const { userId } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState("pending");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -134,11 +138,19 @@ const Cart = () => {
     }
   };
 
-  // Add this helper function
   const isOfferDenied = (item) => {
-    const userId = 1; // Replace with actual user ID from authentication
     const offers = item.product?.status?.offers || [];
-    return !offers.some((offer) => offer.buyerId === userId);
+    if (item.status === "negotiating" && offers.length === 0) {
+      return true;
+    }
+
+    if (offers.length > 0) {
+      // 移除对 product.status 的引用
+      const myOffer = offers.find((offer) => offer.buyerId === userId);
+      return myOffer?.isDenied === true; // 添加可选链操作符
+    }
+
+    return false;
   };
 
   const renderCardStatus = (item, tab) => {
@@ -169,9 +181,11 @@ const Cart = () => {
               {offerDenied ? "Offer Denied - Please Resend" : "Under Negotiation"}
             </span>
             <div className="button-group">
-              <button className="resend-button" onClick={() => handleShowRequestModal(item)}>
-                {offerDenied ? "Resend Offer" : "Update Offer"}
-              </button>
+              {offerDenied && (
+                <button className="resend-button" onClick={() => handleShowRequestModal(item)}>
+                  Resend Offer
+                </button>
+              )}
               <button
                 className="cancel-button"
                 onClick={() => handleRemoveFromCart(item.productId)}
@@ -195,7 +209,9 @@ const Cart = () => {
     }
   };
 
-  const totalItems = cartData.items ? cartData.items.length : 0;
+  const totalItems = cartData.items
+    ? cartData.items.filter((item) => item.status !== "deal").length
+    : 0;
 
   if (loading) return <div>Loading cart data...</div>;
   if (error) return <div>Error: {error}</div>;
