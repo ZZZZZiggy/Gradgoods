@@ -19,25 +19,30 @@ const UserSchema = new mongoose.Schema(
       default: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
     },
     address: {
-      street: String,
-      city: String,
-      zip: String,
+      formatted_address: {
+        type: String,
+        required: false,
+      },
       location: {
         type: {
           type: String,
           enum: ["Point"],
-          required: false,
+          default: "Point",
         },
         coordinates: {
           type: [Number],
-          required: false,
+          default: [0, 0],
         },
+      },
+      updatedAt: {
+        type: Date,
+        default: Date.now,
       },
     },
     cart: {
       items: [
         {
-          productId: Number,
+          productId: String,
           addedAt: String,
           savedPrice: Number,
           currentPrice: Number,
@@ -57,6 +62,13 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
+// Ensure 2dsphere index is created
 UserSchema.index({ "address.location": "2dsphere" });
+
+// Add pre-save middleware for debugging
+UserSchema.pre("save", function (next) {
+  console.log("Saving user with address:", this.address);
+  next();
+});
 
 module.exports = mongoose.model("User", UserSchema);

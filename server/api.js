@@ -15,7 +15,8 @@ const Address = require("./models/address");
 
 // import authentication library
 const auth = require("./auth");
-
+// import mongoose models
+const ProductModel = require("./models/product");
 // api endpoints: all these paths will be prefixed with "/api/"
 const router = express.Router();
 
@@ -27,11 +28,13 @@ router.post("/logout", auth.logout);
 router.get("/whoami", (req, res) => {
   if (!req.user) {
     // not logged in
+    console.log("User not logged in");
     return res.send({});
   }
 
   User.findById(req.user._id)
     .then((user) => {
+      console.log("User logged in:", user);
       res.send(user);
     })
     .catch((err) => {
@@ -50,55 +53,103 @@ router.post("/initsocket", (req, res) => {
 // |------------------------------|
 // | write your API methods below!|
 // |------------------------------|
-const PERSONID = 1; // Temporary user ID for testing
+
 // datafiles
 
-const people = [
-  {
-    _id: 1,
-    userName: "Laowang",
-    verified: true,
-    email: "xiang949@mit.edu",
-    avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-    address: {
-      street: "String",
-      city: "String",
-      zip: "02139",
-      location: {
-        type: "Point",
-        coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+// const people = [
+//   {
+//     _id: 1,
+//     userName: "Laowang",
+//     verified: true,
+//     email: "xiang949@mit.edu",
+//     avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+//     address: {
+//       street: "String",
+//       city: "String",
+//       zip: "02139",
+//       location: {
+//         type: "Point",
+//         coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+//       },
+//     },
+//     createdAt: "2024-01-20",
+//     updatedAt: "2024-01-20",
+//     cart: {
+//       items: [],
+//       lastUpdated: "2024-01-20",
+//     },
+//   },
+//   {
+//     _id: 2,
+//     userName: "Xiaowang",
+//     verified: true,
+//     email: "xiang949@mit.edu",
+//     avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+//     address: {
+//       street: "String",
+//       city: "String",
+//       zip: "02139",
+//       location: {
+//         type: "Point",
+//         coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+//       },
+//     },
+//     cart: {
+//       items: [],
+//       lastUpdated: "2024-01-20",
+//     },
+//     createdAt: "2024-01-20",
+//     updatedAt: "2024-01-20",
+//   },
+// ];
+
+// 将获取用户数据的逻辑封装在一个异步函数中
+const getPeople = async () => {
+  try {
+    const formattedPeople = await User.find();
+    return formattedPeople.map((person) => ({
+      _id: person._id.toString(),
+      userName: person.userName || "",
+      verified: person.verified || false,
+      email: person.email || "",
+      avatar: person.avatar || "",
+      address: {
+        street: person?.address?.street || "",
+        city: person?.address?.city || "",
+        zip: person?.address?.zip || "",
+        location: {
+          type: person?.address?.location?.type || "Point",
+          coordinates: person?.address?.location?.coordinates || [0, 0],
+        },
       },
-    },
-    createdAt: "2024-01-20",
-    updatedAt: "2024-01-20",
-    cart: {
-      items: [],
-      lastUpdated: "2024-01-20",
-    },
-  },
-  {
-    _id: 2,
-    userName: "Xiaowang",
-    verified: true,
-    email: "xiang949@mit.edu",
-    avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-    address: {
-      street: "String",
-      city: "String",
-      zip: "02139",
-      location: {
-        type: "Point",
-        coordinates: [42.37254650364875, -71.09808551429043], // [longitude, latitude]
+      createdAt: person.createdAt ? person.createdAt.toISOString().split("T")[0] : "",
+      updatedAt: person.updatedAt ? person.updatedAt.toISOString().split("T")[0] : "",
+      cart: {
+        items: person?.cart?.items || [],
+        lastUpdated: person?.cart?.lastUpdated
+          ? person.cart.lastUpdated.toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
       },
-    },
-    cart: {
-      items: [],
-      lastUpdated: "2024-01-20",
-    },
-    createdAt: "2024-01-20",
-    updatedAt: "2024-01-20",
-  },
-];
+    }));
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    return [];
+  }
+};
+
+// initialize people data
+let people = [];
+
+// middleware to initialize people data
+router.use(async (req, res, next) => {
+  try {
+    people = await getPeople();
+    next();
+  } catch (err) {
+    console.error("Error initializing people data:", err);
+    next(err);
+  }
+});
 
 // Add helper function for distance calculation
 const calculateDistance = (coords1, coords2) => {
@@ -124,13 +175,11 @@ const calculateDistance = (coords1, coords2) => {
   return Math.round(distance * 10) / 10;
 };
 
-// import mongoose models
-const ProductModel = require("./models/product");
-
 // routers
 router.get("/allproducts", async (req, res) => {
   try {
-    const user = people.find((p) => p._id === PERSONID);
+    const user = people.find((p) => p._id === req.user._id.toString());
+    console.log("User found:", user);
     const userLocation = user?.address?.location?.coordinates;
 
     const products = await ProductModel.find({});
@@ -147,11 +196,14 @@ router.get("/allproducts", async (req, res) => {
 });
 
 router.get("/products", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
-    const user = people.find((p) => p._id === PERSONID);
+    const user = people.find((p) => p._id === req.user._id.toString());
     const userLocation = user?.address?.location?.coordinates;
 
-    const products = await ProductModel.find({ ownerId: PERSONID });
+    const products = await ProductModel.find({ ownerId: req.user._id });
     const productsWithDistance = products.map((product) => ({
       ...product.toObject(),
       distance: calculateDistance(userLocation, product.location?.coordinates) || 0,
@@ -166,13 +218,16 @@ router.get("/products", async (req, res) => {
 
 // Modify the product creation route
 router.post("/products", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
-    const buyer = people.find((p) => p._id === PERSONID);
+    const buyer = people.find((p) => p._id === req.user._id.toString());
     const buyerLocation = buyer?.address?.location?.coordinates;
     const currentDate = new Date().toISOString().split("T")[0];
 
     const newProduct = new ProductModel({
-      ownerId: PERSONID,
+      ownerId: req.user._id,
       owner: "seller1",
       name: req.body.name,
       price: req.body.price,
@@ -281,7 +336,7 @@ router.post("/products/accept-offer", async (req, res) => {
     const updatedProduct = await product.save();
     res.send(updatedProduct);
   } catch (err) {
-    console.error("Detailed error in accept-offer:", err); // 添加详细错误日志
+    console.error("Detailed error in accept-offer:", err);
     res.status(500).send({ error: "Error accepting offer", details: err.message });
   }
 });
@@ -309,40 +364,65 @@ router.post("/products/deny-offer", async (req, res) => {
   }
 });
 
-router.post("/address", (req, res) => {
-  try {
-    const userId = PERSONID; // Using the test user ID
-    const { street, city, zip, lat, lng } = req.body;
+router.post("/address", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
 
-    const user = people.find((p) => p._id === userId);
-    if (!user) {
-      return res.status(404).send({ error: "User not found" });
+  try {
+    const { formatted_address, lat, lng } = req.body;
+    console.log("Received address update:", { formatted_address, lat, lng });
+
+    // Validate coordinates
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+      return res.status(400).send({ error: "Invalid coordinates" });
     }
 
-    // Update user's address with the new format
-    user.address = {
-      street: street,
-      city: city,
-      zip: zip,
-      location: {
+    const updateData = {
+      "address.formatted_address": formatted_address,
+      "address.location": {
         type: "Point",
-        coordinates: [lat, lng], // [latitude, longitude]
+        coordinates: [parseFloat(lng), parseFloat(lat)],
       },
+      "address.updatedAt": new Date(),
     };
 
-    user.updatedAt = new Date().toISOString();
+    // console.log("Update data:", updateData);
+    // console.log("User ID:", req.user._id);
 
-    res.send(user.address);
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      console.log("User not found:", req.user._id);
+      return res.status(404).send({ error: "User not found" });
+    }
+    console.log("Updated user:", updatedUser);
+    res.send(updatedUser.address);
   } catch (err) {
-    console.log(`Error saving address: ${err}`);
-    res.status(500).send({ error: "Error saving address" });
+    console.error("Detailed error saving address:", err);
+    console.error("Error stack:", err.stack);
+    res.status(500).send({
+      error: "Error saving address",
+      details: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
 router.get("/address", (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
-    const userId = PERSONID; // Using the test user ID
-    const user = people.find((p) => p._id === userId);
+    const userId = req.user._id; // Using the test user ID
+    const user = people.find((p) => p._id === userId.toString());
 
     if (!user) {
       return res.status(404).send({ error: "User not found" });
@@ -356,27 +436,42 @@ router.get("/address", (req, res) => {
 });
 
 router.get("/cart", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
-    console.log("Fetching cart for user:", PERSONID);
-    const user = people.find((p) => p._id === PERSONID);
+    console.log("Fetching cart for user:", req.user._id);
+
+    // get user from database
+    const user = await User.findById(req.user._id);
+    console.log("User from database:", user);
 
     if (!user || !user.cart) {
       return res.send({ items: [] });
     }
 
+    // get product details for each item in the cart
     const cartItems = await Promise.all(
       user.cart.items.map(async (item) => {
         const product = await ProductModel.findById(item.productId);
-        if (!product) return null;
+        console.log("Found product:", product);
 
-        // Update cart item status if product is accepted by this user
-        if (product.status?.isAccepted && product.status?.acceptedBy === PERSONID) {
-          item.status = "deal";
+        if (!product) {
+          console.log("Product not found for id:", item.productId);
+          return null;
         }
 
+        // check if product status is accepted by current user
+        const status =
+          product.status?.isAccepted &&
+          product.status?.acceptedBy.toString() === req.user._id.toString()
+            ? "deal"
+            : item.status;
+
         return {
-          ...item,
-          product,
+          ...item.toObject(), // concert Mongoose document to plain JS object
+          product: product.toObject(),
+          status,
           priceChange: {
             hasChanged: item.priceChanged,
             difference: product.price - item.savedPrice,
@@ -385,43 +480,59 @@ router.get("/cart", async (req, res) => {
       })
     );
 
+    console.log("Processed cart items:", cartItems);
+
     const cartWithDetails = {
-      ...user.cart,
       items: cartItems.filter(Boolean),
+      lastUpdated: user.cart.lastUpdated,
     };
+
+    // update in-memory people array
+    const memoryUser = people.find((p) => p._id === req.user._id.toString());
+    if (memoryUser) {
+      memoryUser.cart = cartWithDetails;
+    }
 
     res.send(cartWithDetails);
   } catch (err) {
     console.error("Detailed error in /api/cart:", err);
-    res.status(500).send({ error: "Error fetching cart data", details: err.message });
+    console.error("Error stack:", err.stack);
+    res.status(500).send({
+      error: "Error fetching cart data",
+      details: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
 // Add to cart with pending status
 router.post("/cart/add", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
     const { productId } = req.body;
-    const userId = PERSONID;
+    console.log("Adding to cart:", { productId });
+    const userId = req.user._id;
 
-    const user = people.find((p) => p._id === userId);
+    const user = await User.findById(userId);
     const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
       return res.status(404).send({ error: "User or product not found" });
     }
 
-    // Add item to cart
     if (!user.cart) {
       user.cart = { items: [] };
     }
 
-    // Check if item already exists in cart
-    const existingItem = user.cart.items.find((item) => item.productId === productId);
+    // check if item already in cart
+    const existingItem = user.cart.items.find((item) => item.productId.toString() === productId);
     if (existingItem) {
       return res.status(400).send({ error: "Item already in cart" });
     }
 
-    // Add new item
+    // add item to cart
     const cartItem = {
       productId,
       addedAt: new Date().toISOString(),
@@ -431,32 +542,55 @@ router.post("/cart/add", async (req, res) => {
       status: "pending",
     };
 
+    // update cart
     user.cart.items.push(cartItem);
     user.cart.lastUpdated = new Date().toISOString();
 
+    // save
+    const updatedUser = await user.save();
+    console.log("Cart updated in database:", updatedUser.cart);
+
+    // Update in-memory people array
+    const memoryUser = people.find((p) => p._id === userId.toString());
+    if (memoryUser) {
+      memoryUser.cart = updatedUser.cart;
+    }
+
     res.send(cartItem);
   } catch (err) {
-    console.error("Error adding to cart:", err);
-    res.status(500).send({ error: "Error adding to cart" });
+    console.error("Detailed error adding to cart:", err);
+    console.error("Error stack:", err.stack);
+    res.status(500).send({
+      error: "Error adding to cart",
+      details: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
 // Direct order with offer
 router.post("/cart/order", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
     const { productId, price, message } = req.body;
-    const userId = PERSONID;
+    const userId = req.user._id;
 
-    const user = people.find((p) => p._id === userId);
+    console.log("Processing order with data:", { productId, price, message, userId });
+
+    // Get fresh data from database
+    const user = await User.findById(userId);
     const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
+      console.log("Not found:", { user: !!user, product: !!product });
       return res.status(404).send({ error: "User or product not found" });
     }
 
     // Create new cart item
     const cartItem = {
-      productId,
+      productId: productId.toString(),
       addedAt: new Date().toISOString(),
       savedPrice: product.price,
       currentPrice: product.price,
@@ -464,16 +598,23 @@ router.post("/cart/order", async (req, res) => {
       status: "deal",
     };
 
-    // Update product status
+    // Update product status with proper validation
     const now = new Date().toISOString();
-    product.status = {
+    const updatedStatus = {
       isAccepted: true,
       acceptedBy: userId,
       acceptedAt: now,
+      acceptedOffer: {
+        price: Number(price),
+        message: message || "",
+        createdAt: now,
+        buyerId: userId,
+        Accepted: true,
+      },
       offers: [
         {
-          price,
-          message,
+          price: Number(price),
+          message: message || "",
           createdAt: now,
           buyerId: userId,
           Accepted: true,
@@ -481,37 +622,63 @@ router.post("/cart/order", async (req, res) => {
       ],
     };
 
-    // Save product changes
-    await product.save();
+    // Update product
+    product.status = updatedStatus;
+    const savedProduct = await product.save();
+    console.log("Saved product:", savedProduct);
 
-    // Update cart
+    // Update user's cart
     if (!user.cart) {
-      user.cart = { items: [] };
+      user.cart = { items: [], lastUpdated: now };
     }
 
-    const existingItemIndex = user.cart.items.findIndex((item) => item.productId === productId);
+    const existingItemIndex = user.cart.items.findIndex(
+      (item) => item.productId.toString() === productId.toString()
+    );
+
     if (existingItemIndex !== -1) {
       user.cart.items[existingItemIndex] = cartItem;
     } else {
       user.cart.items.push(cartItem);
     }
-
     user.cart.lastUpdated = now;
 
-    res.send({ cartItem, product });
+    // Save user changes
+    const savedUser = await user.save();
+    console.log("Saved user cart:", savedUser.cart);
+
+    // Update in-memory data
+    const memoryUser = people.find((p) => p._id === userId.toString());
+    if (memoryUser) {
+      memoryUser.cart = savedUser.cart;
+    }
+
+    res.send({
+      cartItem,
+      product: savedProduct.toObject(),
+      success: true,
+    });
   } catch (err) {
-    console.error("Error processing order:", err);
-    res.status(500).send({ error: "Error processing order" });
+    console.error("Detailed error processing order:", err);
+    console.error("Error stack:", err.stack);
+    res.status(500).send({
+      error: "Error processing order",
+      details: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
 // Remove item from cart
 router.post("/cart/remove", (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
     const { productId } = req.body;
-    const userId = PERSONID;
+    const userId = req.user._id;
 
-    const user = people.find((p) => p._id === userId);
+    const user = people.find((p) => p._id === userId.toString());
     if (!user || !user.cart) {
       return res.status(404).send({ error: "Cart not found" });
     }
@@ -529,11 +696,14 @@ router.post("/cart/remove", (req, res) => {
 
 // Add offer to product and update cart status
 router.post("/cart/make-offer", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: "Not logged in" });
+  }
   try {
     const { productId, price, message } = req.body;
-    const userId = PERSONID;
+    const userId = req.user._id;
 
-    const user = people.find((p) => p._id === userId);
+    const user = people.find((p) => p._id === userId.toString());
     const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
