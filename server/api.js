@@ -250,93 +250,58 @@ router.post("/products/delete", async (req, res) => {
   }
 });
 
-router.post("/products/accept-offer", (req, res) => {
+router.post("/products/accept-offer", async (req, res) => {
   try {
     const { productId, offerIndex } = req.body;
-    const productIndex = products.findIndex((p) => p._id === productId);
+    const product = await ProductModel.findById(productId);
 
-    if (productIndex === -1) {
+    if (!product) {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    const product = products[productIndex];
     const acceptedOffer = product.status.offers[offerIndex];
 
     // Update product status
-    products[productIndex] = {
-      ...product,
-      status: {
-        ...product.status,
-        isAccepted: true,
-        acceptedBy: acceptedOffer.buyerId,
-        acceptedAt: new Date().toISOString(),
-        acceptedOffer: acceptedOffer,
-        offers: [], // Clear other offers
-      },
+    product.status = {
+      ...product.status,
+      isAccepted: true,
+      acceptedBy: acceptedOffer.buyerId,
+      acceptedAt: new Date().toISOString(),
+      acceptedOffer: acceptedOffer,
+      offers: [], // Clear other offers
     };
 
-    res.send(products[productIndex]);
+    const updatedProduct = await product.save();
+    res.send(updatedProduct);
   } catch (err) {
     console.error("Error accepting offer:", err);
     res.status(500).send({ error: "Error accepting offer" });
   }
 });
 
-router.post("/products/deny-offer", (req, res) => {
+router.post("/products/deny-offer", async (req, res) => {
   try {
     const { productId, offerIndex } = req.body;
-    const productIndex = products.findIndex((p) => p._id === productId);
+    const product = await ProductModel.findById(productId);
 
-    if (productIndex === -1) {
+    if (!product) {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    const product = products[productIndex];
-    const updatedOffers = [...product.status.offers];
-    updatedOffers.splice(offerIndex, 1);
-
-    // Update product
-    products[productIndex] = {
-      ...product,
-      status: {
-        ...product.status,
-        offers: updatedOffers,
-        Accepted: false,
-      },
-    };
-
-    res.send(products[productIndex]);
-  } catch (err) {
-    console.error("Error denying offer:", err);
-    res.status(500).send({ error: "Error denying offer" });
-  }
-});
-
-router.post("/products/deny-offer", (req, res) => {
-  try {
-    const { productId, offerIndex } = req.body;
-    const productIndex = products.findIndex((p) => p._id === productId);
-
-    if (productIndex === -1) {
-      return res.status(404).send({ error: "Product not found" });
-    }
-
-    const product = products[productIndex];
     const offer = product.status.offers[offerIndex];
-
-    // 更新offer的状态为false
     offer.Accepted = false;
 
-    // 更新购物车中的相应商品状态
+    // Update cart item status for the buyer
     const user = people.find((p) => p._id === offer.buyerId);
     if (user && user.cart) {
       const cartItem = user.cart.items.find((item) => item.productId === productId);
       if (cartItem) {
-        cartItem.lastOfferAccepted = false; // 记录offer被拒绝
+        cartItem.lastOfferAccepted = false;
       }
     }
 
-    res.send(product);
+    const updatedProduct = await product.save();
+    res.send(updatedProduct);
   } catch (err) {
     console.error("Error denying offer:", err);
     res.status(500).send({ error: "Error denying offer" });
@@ -389,49 +354,41 @@ router.get("/address", (req, res) => {
   }
 });
 
-router.get("/cart", (req, res) => {
+router.get("/cart", async (req, res) => {
   try {
     console.log("Fetching cart for user:", PERSONID);
     const user = people.find((p) => p._id === PERSONID);
 
-    if (!user) {
-      console.log("User not found:", PERSONID);
-      return res.status(404).send({ error: "User not found" });
-    }
-
-    if (!user.cart) {
-      console.log("No cart found for user:", PERSONID);
+    if (!user || !user.cart) {
       return res.send({ items: [] });
     }
 
+    const cartItems = await Promise.all(
+      user.cart.items.map(async (item) => {
+        const product = await ProductModel.findById(item.productId);
+        if (!product) return null;
+
+        // Update cart item status if product is accepted by this user
+        if (product.status?.isAccepted && product.status?.acceptedBy === PERSONID) {
+          item.status = "deal";
+        }
+
+        return {
+          ...item,
+          product,
+          priceChange: {
+            hasChanged: item.priceChanged,
+            difference: product.price - item.savedPrice,
+          },
+        };
+      })
+    );
+
     const cartWithDetails = {
       ...user.cart,
-      items: user.cart.items
-        .map((item) => {
-          const product = products.find((p) => p._id === item.productId);
-          if (!product) {
-            console.log("Product not found:", item.productId);
-            return null;
-          }
-
-          // Update cart item status if product is accepted by this user
-          if (product.status.isAccepted && product.status.acceptedBy === PERSONID) {
-            item.status = "deal";
-          }
-
-          return {
-            ...item,
-            product,
-            priceChange: {
-              hasChanged: item.priceChanged,
-              difference: product.price - item.savedPrice,
-            },
-          };
-        })
-        .filter(Boolean),
+      items: cartItems.filter(Boolean),
     };
 
-    console.log("Successfully fetched cart:", cartWithDetails);
     res.send(cartWithDetails);
   } catch (err) {
     console.error("Detailed error in /api/cart:", err);
@@ -440,13 +397,13 @@ router.get("/cart", (req, res) => {
 });
 
 // Add to cart with pending status
-router.post("/cart/add", (req, res) => {
+router.post("/cart/add", async (req, res) => {
   try {
     const { productId } = req.body;
-    const userId = PERSONID; // 临时使用，之后改为 req.user._id
+    const userId = PERSONID;
 
     const user = people.find((p) => p._id === userId);
-    const product = products.find((p) => p._id === productId);
+    const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
       return res.status(404).send({ error: "User or product not found" });
@@ -484,21 +441,16 @@ router.post("/cart/add", (req, res) => {
 });
 
 // Direct order with offer
-router.post("/cart/order", (req, res) => {
+router.post("/cart/order", async (req, res) => {
   try {
     const { productId, price, message } = req.body;
-    const userId = PERSONID; // 临时使用，之后改为 req.user._id
+    const userId = PERSONID;
 
     const user = people.find((p) => p._id === userId);
-    const product = products.find((p) => p._id === productId);
+    const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
       return res.status(404).send({ error: "User or product not found" });
-    }
-
-    // Add item to cart with deal status
-    if (!user.cart) {
-      user.cart = { items: [] };
     }
 
     // Create new cart item
@@ -528,7 +480,14 @@ router.post("/cart/order", (req, res) => {
       ],
     };
 
-    // Update or add cart item
+    // Save product changes
+    await product.save();
+
+    // Update cart
+    if (!user.cart) {
+      user.cart = { items: [] };
+    }
+
     const existingItemIndex = user.cart.items.findIndex((item) => item.productId === productId);
     if (existingItemIndex !== -1) {
       user.cart.items[existingItemIndex] = cartItem;
@@ -568,13 +527,13 @@ router.post("/cart/remove", (req, res) => {
 });
 
 // Add offer to product and update cart status
-router.post("/cart/make-offer", (req, res) => {
+router.post("/cart/make-offer", async (req, res) => {
   try {
     const { productId, price, message } = req.body;
     const userId = PERSONID;
 
     const user = people.find((p) => p._id === userId);
-    const product = products.find((p) => p._id === productId);
+    const product = await ProductModel.findById(productId);
 
     if (!user || !product) {
       return res.status(404).send({ error: "User or product not found" });
@@ -589,9 +548,13 @@ router.post("/cart/make-offer", (req, res) => {
       Accepted: null,
     };
 
+    if (!product.status) {
+      product.status = { offers: [] };
+    }
     product.status.offers.push(newOffer);
+    await product.save();
 
-    // Update cart item status and add offer status tracking
+    // Update cart item status
     const cartItem = user.cart.items.find((item) => item.productId === productId);
     if (cartItem) {
       cartItem.status = "negotiating";

@@ -1,39 +1,112 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 
-const NewItemModal = ({ show, onHide, newItem, setNewItem, onSubmit }) => {
+const NewItemModal = ({ show, onHide, onSubmit, isSubmitting }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    price: "",
+    description: "",
+    method: "Pickup",
+    image: null,
+    imagePreview: null,
+  });
+  const [userLocation, setUserLocation] = useState(null);
+
+  useEffect(() => {
+    // Fetch user's address when modal opens
+    if (show) {
+      fetchUserAddress();
+    }
+  }, [show]);
+
+  const fetchUserAddress = async () => {
+    try {
+      const response = await fetch("/api/address");
+      const address = await response.json();
+      if (address.location) {
+        setUserLocation(address.location.coordinates);
+      }
+    } catch (err) {
+      console.error("Error fetching address:", err);
+    }
+  };
+
+  const compressImage = async (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 压缩为 JPEG 格式，质量 0.7
+          resolve(canvas.toDataURL("image/jpeg", 0.7));
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleLocalImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (file && file.size <= 10 * 1024 * 1024) {
+      // 增加到 10MB
       try {
-        // Create FileReader instance
-        const reader = new FileReader();
-
-        // Set up FileReader onload handler
-        reader.onload = () => {
-          const base64String = reader.result;
-          // Update state with both base64 and preview
-          setNewItem({
-            ...newItem,
-            image: base64String,
-            imagePreview: URL.createObjectURL(file),
-          });
-        };
-
-        // Set up error handler
-        reader.onerror = (error) => {
-          console.error("Error reading file:", error);
-          alert("Error uploading image. Please try again.");
-        };
-
-        // Read the file as Data URL (base64)
-        reader.readAsDataURL(file);
+        const compressedImage = await compressImage(file);
+        setFormData({
+          ...formData,
+          image: compressedImage,
+          imagePreview: URL.createObjectURL(file),
+        });
       } catch (err) {
-        console.error("Error converting image:", err);
+        console.error("Error processing image:", err);
         alert("Error uploading image. Please try again.");
       }
+    } else {
+      alert("Please select an image under 10MB");
     }
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.name || !formData.price || !formData.description || !formData.image) {
+      alert("Please fill in all required fields and upload an image");
+      return;
+    }
+
+    await onSubmit(formData);
+
+    // Reset form
+    setFormData({
+      name: "",
+      price: "",
+      description: "",
+      method: "Pickup",
+      image: null,
+      imagePreview: null,
+    });
   };
 
   return (
@@ -43,8 +116,8 @@ const NewItemModal = ({ show, onHide, newItem, setNewItem, onSubmit }) => {
       </Modal.Header>
       <Modal.Body className="modal-body">
         <div className="image-upload-container">
-          {newItem.imagePreview ? (
-            <img src={newItem.imagePreview} alt="Preview" className="modal-image" />
+          {formData.imagePreview ? (
+            <img src={formData.imagePreview} alt="Preview" className="modal-image" />
           ) : (
             <label className="image-upload-label">
               <input
@@ -63,16 +136,16 @@ const NewItemModal = ({ show, onHide, newItem, setNewItem, onSubmit }) => {
             <Form.Label>Item Name</Form.Label>
             <Form.Control
               type="text"
-              value={newItem.name}
-              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Price ($)</Form.Label>
             <Form.Control
               type="number"
-              value={newItem.price}
-              onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               min="0"
               step="0.01"
             />
@@ -82,41 +155,35 @@ const NewItemModal = ({ show, onHide, newItem, setNewItem, onSubmit }) => {
             <Form.Control
               as="textarea"
               rows={3}
-              value={newItem.description}
-              onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Method</Form.Label>
             <Form.Select
-              value={newItem.method}
-              onChange={(e) => setNewItem({ ...newItem, method: e.target.value })}
+              value={formData.method}
+              onChange={(e) => setFormData({ ...formData, method: e.target.value })}
             >
               <option value="Pickup">Pickup</option>
               <option value="Delivery">Delivery</option>
             </Form.Select>
           </Form.Group>
-          {/* <Form.Group className="mb-3">
-            <Form.Label>Location</Form.Label>
-            <Form.Control
-              type="text"
-              value={
-                userAddress
-                  ? `${userAddress.street}, ${userAddress.city}, ${userAddress.zip}`
-                  : "Loading address..."
-              }
-              disabled
-            />
-          </Form.Group> */}
         </div>
       </Modal.Body>
       <Modal.Footer className="modal-footer">
         <button
           className="modal-button primary"
-          onClick={onSubmit}
-          disabled={!newItem.image || !newItem.name || !newItem.price || !newItem.description}
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting ||
+            !formData.image ||
+            !formData.name ||
+            !formData.price ||
+            !formData.description
+          }
         >
-          Finish
+          {isSubmitting ? "Creating..." : "Finish"}
         </button>
       </Modal.Footer>
     </Modal>

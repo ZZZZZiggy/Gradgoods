@@ -68,50 +68,26 @@ const Sell = () => {
   // Remove the handleImageUpload function as we're using the one in NewItemModal
 
   // construct new product
-  const handleNewItemSubmit = async () => {
+  const handleNewItemSubmit = async (newItemData) => {
     try {
       setIsSubmitting(true);
       setOperationError(null);
 
-      // Changed validation logic
-      if (!newItem.image) {
-        throw new Error("Please upload an image");
-      }
+      // 直接使用从 NewItemModal 传来的数据
+      const savedProduct = await post("/api/products", {
+        name: newItemData.name,
+        price: parseFloat(newItemData.price),
+        method: newItemData.method,
+        description: newItemData.description,
+        image: newItemData.image,
+      });
 
-      const newItemWithDefaults = {
-        name: newItem.name,
-        price: parseFloat(newItem.price),
-        method: newItem.method,
-        description: newItem.description,
-        image: newItem.image, // This will now be the base64 string
-        location: {
-          type: "Point",
-          coordinates: [42.3601, -71.0942], // Default coordinates if needed
-        },
-      };
-
-      const savedProduct = await post("/api/products", newItemWithDefaults);
-
-      // Clean up the preview URL
-      if (newItem.imagePreview) {
-        URL.revokeObjectURL(newItem.imagePreview);
-      }
-
+      // 添加到本地状态
       setRequests((prev) => [...prev, { ...savedProduct, id: savedProduct._id }]);
       setShowNewItemModal(false);
-
-      // Reset form
-      setNewItem({
-        image: null,
-        imagePreview: null,
-        name: "",
-        price: "",
-        description: "",
-        method: "Pickup",
-      });
     } catch (err) {
       setOperationError(err.message || "Failed to create product. Please try again.");
-      console.error(err);
+      console.error("Error creating product:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -340,9 +316,8 @@ const Sell = () => {
           <NewItemModal
             show={showNewItemModal}
             onHide={() => setShowNewItemModal(false)}
-            newItem={newItem}
-            setNewItem={setNewItem}
             onSubmit={handleNewItemSubmit}
+            isSubmitting={isSubmitting}
           />
 
           <EditItemModal
