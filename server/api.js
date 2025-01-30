@@ -288,18 +288,12 @@ router.post("/products/deny-offer", async (req, res) => {
       return res.status(404).send({ error: "Product not found" });
     }
 
-    const offer = product.status.offers[offerIndex];
-    offer.Accepted = false;
-
-    // Update cart item status for the buyer
-    const user = people.find((p) => p._id === offer.buyerId);
-    if (user && user.cart) {
-      const cartItem = user.cart.items.find((item) => item.productId === productId);
-      if (cartItem) {
-        cartItem.lastOfferAccepted = false;
-      }
+    if (!product.status.offers || offerIndex >= product.status.offers.length) {
+      return res.status(400).send({ error: "Invalid offer index" });
     }
 
+    // Remove the denied offer from the offers array
+    product.status.offers.splice(offerIndex, 1);
     const updatedProduct = await product.save();
     res.send(updatedProduct);
   } catch (err) {

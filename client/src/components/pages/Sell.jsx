@@ -143,24 +143,10 @@ const Sell = () => {
       const response = await post("/api/products/deny-offer", {
         productId: itemId,
         offerIndex: offerIndex,
-        lastOfferAccepted: false, // Add this field
       });
 
       // Update local state
-      setRequests((prev) =>
-        prev.map((item) => {
-          if (item.id === itemId) {
-            return {
-              ...response,
-              status: {
-                ...response.status,
-                lastOfferAccepted: false, // Ensure this is set in the local state
-              },
-            };
-          }
-          return item;
-        })
-      );
+      setRequests((prev) => prev.map((item) => (item.id === itemId ? response : item)));
     } catch (err) {
       setOperationError("Failed to deny offer. Please try again.");
       console.error(err);

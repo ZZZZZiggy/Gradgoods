@@ -8,7 +8,6 @@ const Home = () => {
 
   const handleGoogleSuccess = (credentialResponse) => {
     console.log("Google login success:", credentialResponse);
-    // 处理登录成功后的逻辑
     navigate("/market");
   };
 
@@ -20,7 +19,7 @@ const Home = () => {
     <div className="home-wrapper">
       <img src="/homepage.jpg" alt="Homepage" className="home-image" />
       <div className="text-overlay">
-        <h1>Welcome to GradeGoods</h1>
+        <h1>Welcome to GradGoods</h1>
         <p>Your university marketplace for second-hand treasures</p>
         <div className="login-button-container">
           <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} useOneTap />
