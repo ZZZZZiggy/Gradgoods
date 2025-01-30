@@ -2,7 +2,8 @@ import React from "react";
 
 const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
   const formatDate = (dateString) => {
-    return dateString.split("T")[0]; // 只显示 YYYY-MM-DD
+    if (!dateString) return "Date not available";
+    return dateString.split("T")[0];
   };
 
   const renderCardStatus = () => {
@@ -10,7 +11,7 @@ const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
       case "available":
         return (
           <>
-            <span className="status-text">Listed on: {formatDate(item.createdAt)}</span>
+            <span className="status-text">Listed on: {formatDate(item?.createdAt)}</span>
             <div className="button-group">
               <button className="edit-button" onClick={() => onEdit(item.id)}>
                 Edit Listing
@@ -38,7 +39,9 @@ const ItemCard = ({ item, tab, onEdit, onDelete, onAccept, onDeny }) => {
         return (
           <>
             <span className="status-text">Deal Confirmed</span>
-            <span className="sent-date">Confirmed on: {formatDate(item.replyDate)}</span>
+            {item?.status?.acceptedAt && (
+              <span className="sent-date">Confirmed on: {formatDate(item.status.acceptedAt)}</span>
+            )}
             <span className="ready-status">
               Ready for {item.method === "Pickup" ? "Pickup" : "Delivery"}
             </span>

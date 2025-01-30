@@ -169,7 +169,7 @@ router.post("/products", async (req, res) => {
   try {
     const buyer = people.find((p) => p._id === PERSONID);
     const buyerLocation = buyer?.address?.location?.coordinates;
-    const currentDate = new Date().toISOString().split("T")[0]; // 只保留 YYYY-MM-DD
+    const currentDate = new Date().toISOString().split("T")[0];
 
     const newProduct = new ProductModel({
       ownerId: PERSONID,
@@ -253,10 +253,17 @@ router.post("/products/delete", async (req, res) => {
 router.post("/products/accept-offer", async (req, res) => {
   try {
     const { productId, offerIndex } = req.body;
+    console.log("Accepting offer:", { productId, offerIndex }); // 添加调试日志
+
     const product = await ProductModel.findById(productId);
+    console.log("Found product:", product); // 添加调试日志
 
     if (!product) {
       return res.status(404).send({ error: "Product not found" });
+    }
+
+    if (!product.status?.offers || offerIndex >= product.status.offers.length) {
+      return res.status(400).send({ error: "Invalid offer index" });
     }
 
     const acceptedOffer = product.status.offers[offerIndex];
@@ -274,8 +281,8 @@ router.post("/products/accept-offer", async (req, res) => {
     const updatedProduct = await product.save();
     res.send(updatedProduct);
   } catch (err) {
-    console.error("Error accepting offer:", err);
-    res.status(500).send({ error: "Error accepting offer" });
+    console.error("Detailed error in accept-offer:", err); // 添加详细错误日志
+    res.status(500).send({ error: "Error accepting offer", details: err.message });
   }
 });
 
