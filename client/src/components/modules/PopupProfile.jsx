@@ -191,9 +191,15 @@ const PopupProfile = ({ isHovered }) => {
             </Link>
           </div>
           <div className="popup-item">
-            <Link to="#" onClick={handleAddressClick}>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleAddressClick();
+              }}
+            >
               Set Address
-            </Link>
+            </a>
           </div>
         </div>
 
