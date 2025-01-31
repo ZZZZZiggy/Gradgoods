@@ -24,7 +24,7 @@ const Home = () => {
 
   return (
     <div className="home-wrapper">
-      <img src="./homepage.jpg" alt="Homepage" className="home-image" />
+      <img src="/homepage.jpg" alt="Homepage" className="home-image" />
       <div className="text-overlay">
         <h1>Welcome to GradGoods</h1>
         <p>Your university marketplace for second-hand treasures</p>
