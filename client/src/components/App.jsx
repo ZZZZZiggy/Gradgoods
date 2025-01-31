@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import NavBar from "./modules/NavBar";
 import { Outlet } from "react-router-dom";
 import { UserContext } from "./context/UserContext";
@@ -9,14 +10,27 @@ import { get, post } from "../utilities";
 
 const App = () => {
   const [userId, setUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    get("/api/whoami").then((user) => {
-      if (user._id) {
-        setUserId(user._id);
-      }
-    });
-  }, []);
+    get("/api/whoami")
+      .then((user) => {
+        if (user._id) {
+          setUserId(user._id);
+        } else if (location.pathname !== "/") {
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        console.error("Auth check failed:", err);
+        navigate("/");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [navigate, location.pathname]);
 
   const handleLogin = (credentialResponse) => {
     return new Promise((resolve, reject) => {
@@ -38,6 +52,10 @@ const App = () => {
       setUserId(null);
     });
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <UserContext.Provider value={{ userId, handleLogin, handleLogout }}>

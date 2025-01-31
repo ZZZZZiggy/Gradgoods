@@ -9,54 +9,49 @@ import Sell from "./components/pages/Sell";
 import Home from "./components/pages/Home";
 import ProtectedRoute from "./components/modules/ProtectedRoute";
 
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 //TODO: REPLACE WITH YOUR OWN CLIENT_ID
 const GOOGLE_CLIENT_ID = "588092905346-2h7e1ig7imalt3s32u42jbc9tlqmg73f.apps.googleusercontent.com";
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route errorElement={<NotFound />} element={<App />}>
-      <Route path="/" element={<Home />} />
-      <Route
-        path="/market"
-        element={
-          <ProtectedRoute>
-            <Skeleton />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <ProtectedRoute>
-            <Cart />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/sell"
-        element={
-          <ProtectedRoute>
-            <Sell />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/home" element={<Home />} />
-    </Route>
-  )
+const routing = (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<App />}>
+        <Route index element={<Home />} />
+        <Route
+          path="market"
+          element={
+            <ProtectedRoute>
+              <Skeleton />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="sell"
+          element={
+            <ProtectedRoute>
+              <Sell />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  </BrowserRouter>
 );
 
 // renders React Component "Root" into the DOM element with ID "root"
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-    <RouterProvider router={router} />
-  </GoogleOAuthProvider>
+  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{routing}</GoogleOAuthProvider>
 );

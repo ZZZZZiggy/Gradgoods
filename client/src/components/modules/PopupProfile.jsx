@@ -165,7 +165,13 @@ const PopupProfile = ({ isHovered }) => {
         {/* avatar */}
         <div className="popup-avatar">
           <Link to="/cart">
-            <img src={user?.avatar || "/1.jpg"} alt={user?.userName || "Avatar"} />
+            <img
+              src={
+                user?.avatar ||
+                "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+              }
+              alt={user?.userName || "Avatar"}
+            />
           </Link>
         </div>
 
