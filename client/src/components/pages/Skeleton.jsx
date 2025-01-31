@@ -92,14 +92,56 @@ const App = () => {
     setFilterConditions(newFilters);
   };
 
-  // fetch all products
+  // Add calculate distance function
+  const calculateDistance = (coords1, coords2) => {
+    if (!coords1 || !coords2) return 0;
+    const [lat1, lon1] = coords1;
+    const [lat2, lon2] = coords2;
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return (Math.round(R * c * 10) / 10) * 0.621371;
+  };
+
+  // Modify useEffect to fetch user location and calculate distances
   useEffect(() => {
-    get("/api/allproducts").then((productObjs) => {
-      // filter out accepted products
-      const availableProducts = productObjs.filter((product) => !product.status.isAccepted);
-      setProducts(availableProducts);
-      setFilteredProducts(availableProducts);
-    });
+    const fetchData = async () => {
+      try {
+        const userData = await get("/api/whoami");
+        const userLocation = userData?.address?.location?.coordinates;
+        console.log("User location:", userLocation);
+
+        const productObjs = await get("/api/allproducts");
+
+        const productsWithDistance = productObjs.map((product) => ({
+          ...product,
+          distance: userLocation
+            ? calculateDistance(userLocation, product.location.coordinates)
+            : null,
+        }));
+        console.log("Products with distance:", productsWithDistance);
+
+        const availableProducts = productsWithDistance.filter(
+          (product) => !product.status?.isAccepted
+        );
+
+        setProducts(availableProducts);
+        console.log("Available products:", availableProducts);
+        setFilteredProducts(availableProducts);
+        console.log("Filtered products:", availableProducts);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // product pagination

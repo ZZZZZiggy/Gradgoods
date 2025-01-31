@@ -61,8 +61,7 @@ const NewItemModal = ({ show, onHide, onSubmit, isSubmitting }) => {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
-          // 压缩为 JPEG 格式，质量 0.7
-          resolve(canvas.toDataURL("image/jpeg", 0.7));
+          resolve(canvas.toDataURL("image/jpeg", 0.5));
         };
         img.src = event.target.result;
       };
@@ -73,7 +72,6 @@ const NewItemModal = ({ show, onHide, onSubmit, isSubmitting }) => {
   const handleLocalImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file && file.size <= 10 * 1024 * 1024) {
-      // 增加到 10MB
       try {
         const compressedImage = await compressImage(file);
         setFormData({

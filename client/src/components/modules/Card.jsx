@@ -1,10 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
 import "./Card.css";
 
 // this function receives a product object(the hard coded product or from database) and returns a card component
 const ProductCard = ({ product }) => {
   const [showModal, setShowModal] = useState(false);
+  const [distance, setDistance] = useState(null);
+
+  // Calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
+
+  // Fetch user location and calculate distance
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      try {
+        const response = await fetch("/api/whoami");
+        const userData = await response.json();
+
+        if (userData.address?.location?.coordinates && product.location?.coordinates) {
+          const [userLat, userLon] = userData.address.location.coordinates;
+          const [productLat, productLon] = product.location.coordinates;
+
+          const dist = calculateDistance(userLat, userLon, productLat, productLon);
+          setDistance(dist);
+        }
+      } catch (err) {
+        console.error("Error fetching user location:", err);
+      }
+    };
+
+    fetchUserLocation();
+  }, [product]);
 
   // Add helper function to convert km to miles
   const kmToMiles = (km) => {
@@ -110,7 +148,7 @@ const ProductCard = ({ product }) => {
             </p>
             <p className="modal-location">
               <strong>Distance:</strong>{" "}
-              {product.distance ? `${kmToMiles(product.distance)} miles` : "Distance not available"}
+              {distance ? `${kmToMiles(distance)} miles` : "Distance not available"}
             </p>
             {product.location && (
               <p className="modal-location">

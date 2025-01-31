@@ -127,19 +127,10 @@ const calculateDistance = (coords1, coords2) => {
 // routers
 router.get("/allproducts", async (req, res) => {
   try {
-    const user = people.find((p) => p._id === req.user._id.toString());
-    // console.log("User found:", user);
-    const userLocation = user?.address?.location?.coordinates;
-
     const products = await ProductModel.find({});
-    const productsWithDistance = products.map((product) => ({
-      ...product.toObject(),
-      distance: calculateDistance(userLocation, product.location?.coordinates) || 0,
-    }));
-
-    res.send(productsWithDistance);
+    res.send(products);
   } catch (err) {
-    console.error("Detailed error in /api/products:", err);
+    console.error("Error fetching products:", err);
     res.status(500).send({ error: "Error fetching products" });
   }
 });
