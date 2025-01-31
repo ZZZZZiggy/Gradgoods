@@ -22,7 +22,6 @@
   padding-right: var(--s);
 }
 
-/* 自定义滚动条样式 */
 .items_filter_opened::-webkit-scrollbar {
   width: 8px;
 }

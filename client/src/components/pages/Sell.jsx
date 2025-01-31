@@ -73,7 +73,6 @@ const Sell = () => {
       setIsSubmitting(true);
       setOperationError(null);
 
-      // 直接使用从 NewItemModal 传来的数据
       const savedProduct = await post("/api/products", {
         name: newItemData.name,
         price: parseFloat(newItemData.price),
@@ -124,7 +123,6 @@ const Sell = () => {
       });
 
       if (response.success) {
-        // 直接使用返回的更新后的产品列表
         setRequests(
           response.allProducts.map((product) => ({
             ...product,
@@ -155,7 +153,6 @@ const Sell = () => {
       });
 
       if (response.success) {
-        // 直接使用返回的更新后的产品列表
         setRequests(
           response.allProducts.map((product) => ({
             ...product,
@@ -238,11 +235,9 @@ const Sell = () => {
       setIsSubmitting(true);
       setOperationError(null);
 
-      // 使用 _id 而不是 id
       const response = await post("/api/products/delete", { id: itemId });
 
       if (response) {
-        // 更新本地状态
         setRequests((prev) => prev.filter((item) => item._id !== itemId));
         setShowNewItemModal(false);
       } else {
@@ -304,7 +299,7 @@ const Sell = () => {
                   item={item}
                   tab={activeTab}
                   onEdit={handleEdit}
-                  onDelete={() => handleDelete(item._id)} // 使用 _id
+                  onDelete={() => handleDelete(item._id)}
                   onAccept={handleAccept}
                   onDeny={handleDeny}
                 />

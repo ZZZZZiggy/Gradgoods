@@ -7,7 +7,6 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (!userId) {
-    // 保存尝试访问的URL
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

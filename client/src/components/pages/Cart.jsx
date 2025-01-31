@@ -145,9 +145,8 @@ const Cart = () => {
     }
 
     if (offers.length > 0) {
-      // 移除对 product.status 的引用
       const myOffer = offers.find((offer) => offer.buyerId === userId);
-      return myOffer?.isDenied === true; // 添加可选链操作符
+      return myOffer?.isDenied === true;
     }
 
     return false;
