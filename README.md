@@ -1,93 +1,45 @@
-# How to code a webapp with this skeleton
+# GradGoods: Campus Second-Hand Goods Trading Platform
 
-## Initial setup
+## 1. What's the Problem?
 
-All teammates will need (explained in weblab.is/hw0)
+This platform aims to address the challenges faced by graduates and freshmen in trading second-hand furniture and household items within campus communities. Graduates often need to quickly dispose of dorm furniture and personal belongings before leaving, while freshmen seek affordable options for furnishing their living spaces. However, traditional trading methods like e-mail, Google Sheets and group chat images are often fragmented, involve high communication costs, and lack price transparency, leading to inefficiencies in the transaction process.
 
-- A bash console (on Mac or Linux, this is Terminal. On Windows, we recommend Git Bash)
-- NodeJS version 18. If it is installed correctly, typing "node --version" should give v18.13.0 and "npm --version" should give 8.19.3, or higher.
-- Visual Studio Code (or another code editor)
-- the Prettier VSCode extension
+## 2. What's Our Strategy?
 
-Also, all of you will need to go through the MongoDB Atlas setup (https://bit.ly/mongo-setup).
+Our platform centralizes transaction data management, optimizes matching mechanisms, and provides seamless communication and payment options. By making second-hand trading more efficient and transparent, we promote resource recycling and establish a more convenient and sustainable campus lifestyle.
 
-Additionally for authentication, one of you will need to obtain a CLIENT_ID, instructions are at https://bit.ly/gauth-mit.
+## 3. How Does This Platform Benefit Buyers and Sellers?
 
-## Downloading these files
+To enhance the overall transaction experience, our platform focuses on improving both the buyer and seller experience, ensuring a smooth and efficient process.
 
-First, you probably have a team repository somewhere (the link looks like: https://github.com/weblab-class/teammate1-teammate2-teammate3). You each should clone this (empty) repository by navigating to where you want your folder to be (**NOT in catbook**) and typing: git clone https://github.com/weblab-class/teammate1-teammate2-teammate3.git <-- with the correct link.
+### **🆕 How Buyers Benefit (Freshmen):**
 
-Then, one of your team members will need to do the following:
+- 🛒 **One-Stop Second-Hand Trading Platform**: Freshmen can browse, compare, and purchase second-hand furniture and household items on a centralized platform, eliminating the hassle of searching across multiple channels.
+- 🔍 **Advanced Filtering Options**: Items can be filtered based on type, price range, and usage duration, reducing inefficient searches and improving accuracy in finding suitable products.
+- 💬 **End-to-End Transaction Tracking**: A visualized transaction tracking system helps buyers stay informed about each step from initial contact with the seller to final purchase confirmation, ensuring transparency.
 
-First on GitHub, download the skeleton (this repository) as a zip file, by clicking Code -> Download as ZIP. (Do not clone it, since this will download extra files, like .git, which will lead to GitHub being confused).
+### **🎓 How Sellers Benefit (Graduates):**
 
-Then, drag over all of the files in this skeleton into your team's folder. **Make sure to also drag over the hidden files!** To see these hidden files, navigate to the skeleton in Finder/File Explorer and press command+shift+period (mac) or View > Show > Hidden items (windows).
+- 📢 **Quick & Easy Post**: A standardized template simplifies the process of uploading items, enabling graduates to efficiently post their second-hand goods.
+- 📋 **Personal Inventory Management**: A dedicated database tracks item status across different transaction stages, allowing sellers to manage multiple sales efficiently and streamline transactions.
+- 💰 **Effective Pricing & Negotiation**: Supports multi-buyer inquiries and bidding, enabling sellers to interact with multiple potential buyers simultaneously and secure the best deals more quickly.
 
-The files/folders you must drag over are:
+## 4. How Can You Use This Platform?
 
-- .gitignore (hidden)
-- .npmrc (hidden)
-- .prettierrc (hidden)
-- client (folder)
-- package-lock.json
-- package.json
-- README.md
-- server (folder)
-- vite.config.js
+### **Buyer:**
 
-Additionally, you must create a .env file in the root directory. See .env.example for an example of what this file should look like.
+1. 📝 **Sign Up & Log In**: Create an account and set preferences for furniture and household items.
+2. 🏷️ **Browse Listings**: Explore second-hand furniture and items listed by graduates using search and filtering options.
+3. 📞 **Send the Request**: Send the request and price offer to the byer.
+4. 🤝 **Confirm Transaction**: Agree on transaction details, including delivery method (in-person pickup, campus delivery, etc.).
+5. ✅ **Payment & Receipt**: Complete payment, confirm receipt.
 
-Then, in terminal, navigate to your teams folder and push all of the files to your team's GitHub repository as usual:
+### **Seller:**
 
-- git add -A
-- git commit -m "Skeleton code"
-- git push
+1. 📝 **Sign Up & Log In**: Create an account and complete personal profile details.
+2. 📸 **List Items for Sale**: Upload item details, including images, prices, descriptions, and delivery methods.
+3. 📩 **Receive Buyer Inquiries**: Respond to buyer questions and negotiate transaction details.
+4. 📦 **Coordinate Transaction & Delivery**: Finalize the sale and arrange pickup or delivery details with the buyer.
+5. 🎉 **Complete Transaction**: Once the buyer confirms receipt, the transaction is complete.
 
-Now the rest of your teammates can pull all these files with a 'git pull'!
-
-Post on Piazza if you run into any issues
-
-## What you need to change in the skeleton
-
-- Change the Frontend CLIENT_ID (Skeleton.js) to your team's CLIENT_ID (obtain this at https://bit.ly/gauth-mit)
-- Change the Server CLIENT_ID to the same CLIENT_ID (auth.js)
-- Change the Database SRV (mongoConnectionURL) for Atlas (server.js). You got this in the MongoDB setup. remember to replace <password> and <dbname> (should be no < or > in your SRV) (From: https://bit.ly/mongo-setup)
-- Change the Database Name for MongoDB to whatever you put in the SRV to replace <dbname> (server.js)
-- (Optional) Add a favicon to your website at the path client/dist/favicon.ico
-- (Optional) Update website title in client/dist/index.html
-- (Optional) Update this README file ;)
-- (Optional) Update the package.json file with your app name :) (line 2)
-
-## How to run this skeleton
-
-First, 'npm install'
-Then open two separate terminals, and 'npm run dev' in the first, and 'npm start' in the second.
-Then open http://localhost:5173
-
-<!-- ## How to go from this skeleton to your actual app
-
-Check out this [How to Get Started Guide](http://weblab.is/get-started) -->
-
-## Socket stuff
-
-Note: we'll be getting to this in lecture in week 2, so don't worry if you don't know it yet
-
-- If you're not using realtime updating or don't need server->client communication, you can remove socket entirely! (server-socket.js, client-socket.js, and anything that imports them)
-- If you are using sockets, consider what you want to do with the FIXME in server-socket.js
-
-## Edit at your own risk
-
-the following files students do not need to edit. feel free to read them if you would like.
-
-```
-client/src/utilities.js
-client/src/client-socket.js
-server/validator.js
-server/server-socket.js
-.npmrc
-.prettierrc
-package-lock.json
-vite.config.js
-```
-
-## Good luck on your project :)
+Our platform aims to streamline second-hand goods trading within campus communities, helping graduates efficiently dispose of unused items while providing freshmen with affordable and convenient furnishing solutions. 🌱

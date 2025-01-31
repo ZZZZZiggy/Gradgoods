@@ -39,19 +39,19 @@ const NewItemModal = ({ show, onHide, onSubmit, isSubmitting }) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
+          const MAX_WIDTH = 600;
+          const MAX_HEIGHT = 600;
           let width = img.width;
           let height = img.height;
 
           if (width > height) {
             if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
+              height = Math.round((height * MAX_WIDTH) / width);
               width = MAX_WIDTH;
             }
           } else {
             if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
+              width = Math.round((width * MAX_HEIGHT) / height);
               height = MAX_HEIGHT;
             }
           }
@@ -61,7 +61,14 @@ const NewItemModal = ({ show, onHide, onSubmit, isSubmitting }) => {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
-          resolve(canvas.toDataURL("image/jpeg", 0.5));
+          let quality = 0.7;
+          let dataUrl;
+          do {
+            dataUrl = canvas.toDataURL("image/jpeg", quality);
+            quality -= 0.1;
+          } while (dataUrl.length > 800000 && quality > 0.1);
+
+          resolve(dataUrl);
         };
         img.src = event.target.result;
       };
@@ -71,20 +78,31 @@ const NewItemModal = ({ show, onHide, onSubmit, isSubmitting }) => {
 
   const handleLocalImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file && file.size <= 10 * 1024 * 1024) {
-      try {
-        const compressedImage = await compressImage(file);
-        setFormData({
-          ...formData,
-          image: compressedImage,
-          imagePreview: URL.createObjectURL(file),
-        });
-      } catch (err) {
-        console.error("Error processing image:", err);
-        alert("Error uploading image. Please try again.");
+    const maxSize = 5 * 1024 * 1024;
+
+    if (!file) return;
+
+    if (file.size > maxSize) {
+      alert("Please select an image under 5MB");
+      return;
+    }
+
+    try {
+      const compressedImage = await compressImage(file);
+
+      if (compressedImage.length > 1024 * 1024) {
+        alert("Image is too large even after compression. Please try a smaller image.");
+        return;
       }
-    } else {
-      alert("Please select an image under 10MB");
+
+      setFormData({
+        ...formData,
+        image: compressedImage,
+        imagePreview: URL.createObjectURL(file),
+      });
+    } catch (err) {
+      console.error("Error processing image:", err);
+      alert("Error uploading image. Please try a smaller image or different format.");
     }
   };
 

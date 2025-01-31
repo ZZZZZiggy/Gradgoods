@@ -1,7 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+      default-src 'self' https: localhost:*;
+      img-src 'self' data: https: blob:;
+      script-src 'self' https: localhost:* 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com;
+      style-src 'self' https: 'unsafe-inline' https://cdnjs.cloudflare.com;
+      font-src 'self' data: https: https://cdnjs.cloudflare.com;
+      connect-src 'self' https: localhost:* ws://localhost:*;
+    "
+    />
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdv7b-cUOqT_zrlaG-nrtgoEbO3KvRfXc&libraries=places"></script>
     <link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
     <link rel="icon" href="favicon.png" type="image/x-icon" />
     <title>GradGoods</title>
